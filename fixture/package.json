@@ -1,0 +1,42 @@
+{
+  "name": "rcp",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "description": "Anything about React Component",
+  "author": "imcuttle",
+  "scripts": {
+    "new": "edam",
+    "test": "npx lerna run test --stream",
+    "precommit": "pretty-quick --staged && node scripts/gen-readme.js && git add README.md",
+    "bootstrap": "lerna bootstrap && npm run dist",
+    "dist": "lerna run --parallel dist",
+    "dev": "lerna run --parallel dev",
+    "release": "lerna publish --conventional-commits -m 'chore(release): publish'",
+    "build": "rimraf lib && babel src/ -Dd lib",
+    "version": "npm run changelog",
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "keywords": [
+    "imcuttle",
+    "rcp"
+  ],
+  "typings": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": "imcuttle/rcp",
+  "edam": {
+    "source": "./packages/__template",
+    "output": "./packages"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "devDependencies": {
+  }
+}
