@@ -1,13 +1,13 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: "gh-release-changelog"
+description: "GitHub Release by Changelog"
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  token: # id of input
+    description: "github token"
     required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps
-    description: 'The current time after waiting'
+    default: ${{ secrets.GITHUB_TOKEN }}
+#outputs:
+#  time: # output will be available to future steps
+#    description: "The current time after waiting"
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"
