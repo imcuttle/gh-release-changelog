@@ -1,12 +1,12 @@
-name: 'gh-release-changelog'
+name: "gh-release-changelog"
 
 on:
   push:
     tags:
-      - '[0-9]+.*'
-      - 'v[0-9]+.*'
+      - "[0-9]+.*"
+      - "v[0-9]+.*"
       - '@[a-z_]+\/[a-z_]+@[0-9]+.*'
-      - '[a-z_]+@[0-9]+.*'
+      - "[a-z_]+@[0-9]+.*"
 
 jobs:
   gh-release-changelog:
