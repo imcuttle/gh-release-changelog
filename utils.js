@@ -99,7 +99,16 @@ const versionRegs = [
 ];
 
 const isVersionText = (exports.isVersionText = (text) => {
-  return !!parserVersion(text)
+  return !!parserVersion(text);
+});
+
+// 0.0.0
+const isStandardVersion = (exports.isStandardVersion = (text) => {
+  const data = parserVersion(text);
+  if (data) {
+    return /^\d+\.\d+(\.\d+)$/.test(data.version);
+  }
+  return false;
 });
 
 const parserVersion = (exports.parserVersion = (text) => {

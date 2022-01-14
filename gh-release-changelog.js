@@ -43,7 +43,15 @@ async function ghReleaseChangelog({
   label,
   skipEnvGithubRepoInfer,
   checkPkgAvailable = false,
+  checkStandardVersion = true,
 }) {
+  if (!tag) {
+    throw new Error(`tag is required`);
+  }
+  if (checkStandardVersion && !utils.isStandardVersion(tag)) {
+    throw new Error(`tag "${tag}" is not a standard version`);
+  }
+
   if (checkPkgAvailable) {
     const pkg = await utils.getPkg(cwd);
     if (!pkg) {

@@ -49,7 +49,15 @@ async function ghReleaseChangelog({
   label,
   skipEnvGithubRepoInfer,
   checkPkgAvailable = false,
+  checkStandardVersion = true,
 }) {
+  if (!tag) {
+    throw new Error(`tag is required`);
+  }
+  if (checkStandardVersion && !utils.isStandardVersion(tag)) {
+    throw new Error(`tag "${tag}" is not a standard version`);
+  }
+
   if (checkPkgAvailable) {
     const pkg = await utils.getPkg(cwd);
     if (!pkg) {
@@ -31510,7 +31518,16 @@ const versionRegs = [
 ];
 
 const isVersionText = (exports.isVersionText = (text) => {
-  return !!parserVersion(text)
+  return !!parserVersion(text);
+});
+
+// 0.0.0
+const isStandardVersion = (exports.isStandardVersion = (text) => {
+  const data = parserVersion(text);
+  if (data) {
+    return /^\d+\.\d+(\.\d+)$/.test(data.version);
+  }
+  return false;
 });
 
 const parserVersion = (exports.parserVersion = (text) => {
@@ -31776,6 +31793,7 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getInput("dryRun");
+    const checkStandardVersion = core.getInput("checkStandardVersion");
     const checkPkgAvailable =
       core.getInput("checkPkgAvailable") == null
         ? true
@@ -31796,19 +31814,21 @@ async function run() {
     }
 
     const workspaces = await getWorkspaceConfig();
+    const options = {
+      checkPkgAvailable,
+      checkStandardVersion,
+      tag,
+      fromTag,
+      githubToken: token,
+      ignoreTests,
+      changelogFilename,
+      label,
+      repoOwner,
+      repoName,
+      dryRun,
+    }
     if (!workspaces || !workspaces.length) {
-      const result = await ghReleaseChangelog({
-        checkPkgAvailable,
-        tag,
-        fromTag,
-        githubToken: token,
-        ignoreTests,
-        changelogFilename,
-        label,
-        repoOwner,
-        repoName,
-        dryRun,
-      });
+      const result = await ghReleaseChangelog(options);
       if (dryRun) {
         core.info(JSON.stringify(result, null, 2));
       }

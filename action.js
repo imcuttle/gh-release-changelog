@@ -55,6 +55,7 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getInput("dryRun");
+    const checkStandardVersion = core.getInput("checkStandardVersion");
     const checkPkgAvailable =
       core.getInput("checkPkgAvailable") == null
         ? true
@@ -75,19 +76,21 @@ async function run() {
     }
 
     const workspaces = await getWorkspaceConfig();
+    const options = {
+      checkPkgAvailable,
+      checkStandardVersion,
+      tag,
+      fromTag,
+      githubToken: token,
+      ignoreTests,
+      changelogFilename,
+      label,
+      repoOwner,
+      repoName,
+      dryRun,
+    }
     if (!workspaces || !workspaces.length) {
-      const result = await ghReleaseChangelog({
-        checkPkgAvailable,
-        tag,
-        fromTag,
-        githubToken: token,
-        ignoreTests,
-        changelogFilename,
-        label,
-        repoOwner,
-        repoName,
-        dryRun,
-      });
+      const result = await ghReleaseChangelog(options);
       if (dryRun) {
         core.info(JSON.stringify(result, null, 2));
       }
