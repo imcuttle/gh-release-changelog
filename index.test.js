@@ -1,48 +1,106 @@
-const ghReleaseChangelog = require("./gh-release-changelog");
-const process = require("process");
-const cp = require("child_process");
+const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require("./");
 const path = require("path");
+const { testCreateRelease } = require("@actions/github");
 
 const fixture = (name) => path.resolve(__dirname, "fixture", name);
 
-test("ghReleaseChangelog valid", async () => {
-  const data = await ghReleaseChangelog({
-    cwd: fixture("valid"),
-    tag: "v1.0.0",
-    dryRun: true,
-    githubToken: "noop",
-    label: "@rcp/abc",
-    skipEnvGithubRepoInfer: true,
-  });
-  expect(data.changelogFilename).toBe(fixture("valid/CHANGELOG.md"));
-  delete data.changelogFilename;
-  expect(data).toMatchSnapshot();
+jest.mock("@actions/github", () => {
+  const testCreateRelease = jest.fn(() => {});
+  return {
+    testCreateRelease,
+    getOctokit: () => {
+      return {
+        repos: {
+          createRelease: testCreateRelease,
+        },
+      };
+    },
+  };
 });
 
-test("ghReleaseChangelog lerna-sub not-found", async () => {
-  const data = await ghReleaseChangelog({
-    cwd: fixture("lerna-sub"),
-    tag: "v1.0.0",
-    dryRun: true,
-    githubToken: "noop",
-    label: "@rcp/abc",
-    skipEnvGithubRepoInfer: true,
-  });
-  expect(data.changelogFilename).toBe(fixture("lerna-sub/CHANGELOG.md"));
-  delete data.changelogFilename;
-  expect(data).toMatchSnapshot();
+beforeEach(() => {
+  testCreateRelease.mockClear();
 });
 
-test("ghReleaseChangelog lerna-sub version bump only", async () => {
-  const data = await ghReleaseChangelog({
-    cwd: fixture("lerna-sub"),
-    tag: "v1.0.1",
-    dryRun: true,
-    githubToken: "noop",
-    label: "@rcp/abc",
-    skipEnvGithubRepoInfer: true,
+describe("ghReleaseChangelog", () => {
+  test("valid", async () => {
+    const data = await ghReleaseChangelog({
+      cwd: fixture("valid"),
+      tag: "v1.0.0",
+      githubToken: "noop",
+      label: "@rcp/abc",
+      skipEnvGithubRepoInfer: true,
+    });
+
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
   });
-  expect(data.changelogFilename).toBe(fixture("lerna-sub/CHANGELOG.md"));
-  delete data.changelogFilename;
-  expect(data).toMatchSnapshot();
+
+  test("lerna-sub not-found", async () => {
+    await ghReleaseChangelog({
+      cwd: fixture("lerna-sub"),
+      tag: "v1.0.0",
+      githubToken: "noop",
+      label: "@rcp/abc",
+      skipEnvGithubRepoInfer: true,
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(0);
+  });
+
+  test("lerna-sub version bump only", async () => {
+    await ghReleaseChangelog({
+      cwd: fixture("lerna-sub"),
+      tag: "v1.0.1",
+      githubToken: "noop",
+      label: "@rcp/abc",
+      skipEnvGithubRepoInfer: true,
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe("ghReleaseChangelogMonorepo", () => {
+  it("lerna", async function () {
+    await ghReleaseChangelogMonorepo({
+      cwd: fixture("monorepo/lerna"),
+      tag: "1.0.0",
+      repoName: "a",
+      repoOwner: "o",
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it("pnpm", async function () {
+    await ghReleaseChangelogMonorepo({
+      cwd: fixture("monorepo/pnpm"),
+      repoName: "a",
+      repoOwner: "o",
+      tag: "1.0.0",
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it("workspaces", async function () {
+    await ghReleaseChangelogMonorepo({
+      cwd: fixture("monorepo/workspaces"),
+      repoName: "a",
+      repoOwner: "o",
+      tag: "1.0.0",
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it("same-version-root-changelog", async function () {
+    await ghReleaseChangelogMonorepo({
+      cwd: fixture("monorepo/same-version-root-changelog"),
+      tag: "1.0.0",
+      repoName: 'a',
+      repoOwner: 'o',
+    });
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+  });
 });

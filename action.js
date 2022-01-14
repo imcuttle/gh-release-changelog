@@ -1,36 +1,7 @@
 const core = require("@actions/core");
-const fs = require("fs");
-const nps = require("path");
-const { promisify } = require("util");
-const readYaml = require("read-yaml-file");
 const cp = require("child_process");
 const ghReleaseChangelog = require("./gh-release-changelog");
-const _readJSON = require("read-json-file");
 const utils = require("./utils");
-const readJSON = promisify(_readJSON);
-
-async function getWorkspaceConfig(cwd = process.cwd()) {
-  const existsFile = (filename) => {
-    return fs.existsSync(filename) && fs.statSync(filename).isFile();
-  };
-  const pnpmWorkSpace = nps.join(cwd, "pnpm-workspace.yaml");
-  if (existsFile(pnpmWorkSpace)) {
-    return (await readYaml(pnpmWorkSpace)).packages;
-  }
-
-  const pkgPath = nps.join(cwd, "package.json");
-  if (existsFile(pkgPath)) {
-    const pkg = await readJSON(pkgPath);
-    if (pkg.workspaces) {
-      return pkg.workspaces;
-    }
-  }
-
-  const lernaPath = nps.join(cwd, "lerna.json");
-  if (existsFile(lernaPath)) {
-    return (await readJSON(lernaPath)).packages;
-  }
-}
 
 const exec = (cmd) => {
   try {
@@ -75,7 +46,7 @@ async function run() {
       }
     }
 
-    const workspaces = await getWorkspaceConfig();
+    const workspaces = await utils.getWorkspaceConfig();
     const options = {
       checkPkgAvailable,
       checkStandardVersion,
@@ -103,6 +74,7 @@ async function run() {
         core.info(JSON.stringify(result, null, 2));
       }
     } else {
+
       // monorepo
     }
 

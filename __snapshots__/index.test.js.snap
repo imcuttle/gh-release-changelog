@@ -1,38 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ghReleaseChangelog lerna-sub not-found 1`] = `
-Object {
-  "depth": undefined,
-  "fromTag": undefined,
-  "githubToken": "noop",
-  "label": "@rcp/abc",
-  "releaseNote": "",
-  "repoName": "rcp.git",
-  "repoOwner": "imcuttle",
-  "tag": "v1.0.0",
-}
-`;
-
-exports[`ghReleaseChangelog lerna-sub version bump only 1`] = `
-Object {
-  "depth": 1,
-  "fromTag": undefined,
-  "githubToken": "noop",
-  "label": "@rcp/abc",
-  "releaseNote": "",
-  "repoName": "rcp.git",
-  "repoOwner": "imcuttle",
-  "tag": "v1.0.1",
-}
-`;
-
 exports[`ghReleaseChangelog valid 1`] = `
-Object {
-  "depth": 2,
-  "fromTag": undefined,
-  "githubToken": "noop",
-  "label": "@rcp/abc",
-  "releaseNote": "## @rcp/abc
+Array [
+  Object {
+    "body": "## @rcp/abc
 
 ### Bug Fixes
 
@@ -63,8 +34,90 @@ Object {
 *   remove global option
 
 Full Changelog: [v1.0.0](https://github.com/imcuttle/rcp/commits/v1.0.0)",
-  "repoName": "rcp",
-  "repoOwner": "imcuttle",
-  "tag": "v1.0.0",
-}
+    "draft": true,
+    "owner": "imcuttle",
+    "repo": "rcp",
+    "tag_name": "v1.0.0",
+  },
+]
+`;
+
+exports[`ghReleaseChangelogMonorepo lerna 1`] = `
+Array [
+  Object {
+    "body": "#### a
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)
+
+#### b
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)",
+    "draft": undefined,
+    "owner": "o",
+    "repo": "a",
+    "tag_name": "1.0.0",
+  },
+]
+`;
+
+exports[`ghReleaseChangelogMonorepo pnpm 1`] = `
+Array [
+  Object {
+    "body": "#### a
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)
+
+#### b
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)",
+    "draft": undefined,
+    "owner": "o",
+    "repo": "a",
+    "tag_name": "1.0.0",
+  },
+]
+`;
+
+exports[`ghReleaseChangelogMonorepo same-version-root-changelog 1`] = `
+Array [
+  Object {
+    "body": "Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)",
+    "draft": undefined,
+    "owner": "o",
+    "repo": "a",
+    "tag_name": "1.0.0",
+  },
+]
+`;
+
+exports[`ghReleaseChangelogMonorepo workspaces 1`] = `
+Array [
+  Object {
+    "body": "#### a
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)
+
+#### b
+
+Haha, :smile:
+
+Full Changelog: [1.0.0](https://github.com/o/a/commits/1.0.0)",
+    "draft": undefined,
+    "owner": "o",
+    "repo": "a",
+    "tag_name": "1.0.0",
+  },
+]
 `;

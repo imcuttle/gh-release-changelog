@@ -1,0 +1,9 @@
+{
+  "name": "same-version-root-changelog",
+  "version": "1.0.0",
+  "repository": "imcuttle/same-version-root-changelog",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {}
+}

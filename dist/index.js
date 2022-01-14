@@ -41,13 +41,14 @@ async function ghReleaseChangelog({
   tag = execSyncStdout(`git describe --abbrev=0 --tags HEAD`),
   fromTag,
   dryRun,
-  githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
+  githubToken,
   repoOwner,
   repoName,
   draft = true,
   ignoreTests = defaultIgnoreTests,
   label,
   skipEnvGithubRepoInfer,
+  initialDepth = 4,
   checkPkgAvailable = false,
   checkStandardVersion = true,
 }) {
@@ -69,40 +70,6 @@ async function ghReleaseChangelog({
     }
   }
 
-  if (!repoOwner && !repoName) {
-    if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
-      [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
-    }
-    if (!repoOwner && !repoName) {
-      const pkgPath = nps.join(cwd, "package.json");
-      if (fs.existsSync(pkgPath) && fs.statSync(pkgPath).isFile()) {
-        const pkg = await readJSON(pkgPath);
-        let repoUrl = pkg.repository;
-        if (repoUrl) {
-          if (typeof repoUrl === "object" && repoUrl.url) {
-            repoUrl = repoUrl.url;
-          }
-
-          const matches = repoUrl.match(
-            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.*)/i
-          );
-          if (matches) {
-            [repoOwner, repoName] = matches[1].split("/");
-          } else {
-            [repoOwner, repoName] = repoUrl.split("/");
-          }
-        }
-      }
-    }
-  }
-
-  if (!repoOwner) {
-    throw new Error(`"repoOwner" is required`);
-  }
-  if (!repoName) {
-    throw new Error(`"repoName" is required`);
-  }
-
   if (!changelogFilename) {
     const files = await globby(
       ["changelog.md", "release.md", "release-note.md", "release-notes.md"],
@@ -120,6 +87,17 @@ async function ghReleaseChangelog({
     throw new Error(`"changelogFilename" is required`);
   }
 
+  [repoOwner, repoName] = await utils.inferRepoInfo(repoOwner, repoName, {
+    skipEnvGithubRepoInfer,
+    cwd,
+  });
+  if (!repoOwner) {
+    throw new Error(`"repoOwner" is required`);
+  }
+  if (!repoName) {
+    throw new Error(`"repoName" is required`);
+  }
+
   changelogFilename = nps.resolve(cwd, changelogFilename);
   const changelog = await fs.promises.readFile(changelogFilename, "utf-8");
 
@@ -131,7 +109,6 @@ async function ghReleaseChangelog({
         if (node.type === "heading") {
           const heading = nodeToString(node).trim();
           if (isMatchedTag(heading, tag)) {
-            const initialDepth = node.depth;
             // depth = initialDepth
             // add next Siblings which is not version heading
             let index = ctx.index + 1;
@@ -148,6 +125,13 @@ async function ghReleaseChangelog({
                 !utils.isVersionText(text) ||
                 (fromTag && !isMatchedTag(text, fromTag))
               ) {
+                if (!fromTag && nextNode.type === "heading") {
+                  const tmp = utils.parserVersion(text);
+                  if (tmp && tmp.version) {
+                    fromTag = tmp.version;
+                  }
+                }
+
                 if (nextNode.type === "heading") {
                   if (nextNode.depth > 1) {
                     depth = Math.min(
@@ -165,8 +149,7 @@ async function ghReleaseChangelog({
                 break;
               }
             }
-
-            depth = depth || Math.max(1, initialDepth - 1);
+            depth = depth || initialDepth;
             ctx.break();
           }
         }
@@ -195,7 +178,7 @@ async function ghReleaseChangelog({
 
   if (dryRun) {
     return {
-      releaseNote,
+      releaseNote: releaseNote.trim(),
       changelogFilename,
       githubToken,
       repoOwner,
@@ -209,13 +192,13 @@ async function ghReleaseChangelog({
     if (!releaseNote.trim()) {
       return;
     }
-    const octokit = github.getOctokit(githubToken);
-    await octokit.repos.createRelease({
-      owner: repoOwner,
-      repo: repoName,
-      tag_name: tag,
-      body: JSON.parse(releaseNote),
+    return utils.releaseGitHub({
+      repoOwner,
+      repoName,
       draft,
+      tag,
+      githubToken,
+      releaseNote,
     });
   }
 }
@@ -31420,6 +31403,7 @@ function factory(key, options) {
 const cp = __nccwpck_require__(3129);
 const fs = __nccwpck_require__(5747);
 const nps = __nccwpck_require__(5622);
+const github = __nccwpck_require__(5438);
 const { promisify } = __nccwpck_require__(1669);
 const readYaml = __nccwpck_require__(2920);
 const _readJSON = __nccwpck_require__(4085);
@@ -31546,6 +31530,75 @@ const parserVersion = (exports.parserVersion = (text) => {
       };
     }
   }
+});
+
+const inferRepoInfo = (exports.inferRepoInfo = async (
+  repoOwner,
+  repoName,
+  { cwd, skipEnvGithubRepoInfer } = {}
+) => {
+  if (!repoOwner && !repoName) {
+    if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
+      [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
+    }
+    if (!repoOwner && !repoName) {
+      const pkgPath = nps.join(cwd, "package.json");
+      if (fs.existsSync(pkgPath) && fs.statSync(pkgPath).isFile()) {
+        const pkg = await readJSON(pkgPath);
+        let repoUrl = pkg.repository;
+        if (repoUrl) {
+          if (typeof repoUrl === "object" && repoUrl.url) {
+            repoUrl = repoUrl.url;
+          }
+
+          const matches = repoUrl.match(
+            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.*)/i
+          );
+          if (matches) {
+            [repoOwner, repoName] = matches[1].split("/");
+          } else {
+            [repoOwner, repoName] = repoUrl.split("/");
+          }
+        }
+      }
+    }
+  }
+
+  return [repoOwner, repoName];
+});
+
+const releaseGitHub = (exports.releaseGitHub = async function ({
+  repoOwner,
+  repoName,
+  draft,
+  tag,
+  githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
+  releaseNote,
+}) {
+  if (!releaseNote.trim()) {
+    throw new Error(`releaseNote is empty when release github`);
+  }
+  if (!githubToken) {
+    throw new Error(`githubToken is empty when release github`);
+  }
+  if (!repoName) {
+    throw new Error(`repoName is empty when release github`);
+  }
+  if (!repoOwner) {
+    throw new Error(`repoOwner is empty when release github`);
+  }
+  if (!tag) {
+    throw new Error(`tag is empty when release github`);
+  }
+
+  const octokit = github.getOctokit(githubToken);
+  return await octokit.repos.createRelease({
+    owner: repoOwner,
+    repo: repoName,
+    tag_name: tag,
+    body: releaseNote.trim(),
+    draft,
+  });
 });
 
 
@@ -31737,38 +31790,9 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(2186);
-const fs = __nccwpck_require__(5747);
-const nps = __nccwpck_require__(5622);
-const { promisify } = __nccwpck_require__(1669);
-const readYaml = __nccwpck_require__(2920);
 const cp = __nccwpck_require__(3129);
 const ghReleaseChangelog = __nccwpck_require__(7447);
-const _readJSON = __nccwpck_require__(4085);
 const utils = __nccwpck_require__(1252);
-const readJSON = promisify(_readJSON);
-
-async function getWorkspaceConfig(cwd = process.cwd()) {
-  const existsFile = (filename) => {
-    return fs.existsSync(filename) && fs.statSync(filename).isFile();
-  };
-  const pnpmWorkSpace = nps.join(cwd, "pnpm-workspace.yaml");
-  if (existsFile(pnpmWorkSpace)) {
-    return (await readYaml(pnpmWorkSpace)).packages;
-  }
-
-  const pkgPath = nps.join(cwd, "package.json");
-  if (existsFile(pkgPath)) {
-    const pkg = await readJSON(pkgPath);
-    if (pkg.workspaces) {
-      return pkg.workspaces;
-    }
-  }
-
-  const lernaPath = nps.join(cwd, "lerna.json");
-  if (existsFile(lernaPath)) {
-    return (await readJSON(lernaPath)).packages;
-  }
-}
 
 const exec = (cmd) => {
   try {
@@ -31813,7 +31837,7 @@ async function run() {
       }
     }
 
-    const workspaces = await getWorkspaceConfig();
+    const workspaces = await utils.getWorkspaceConfig();
     const options = {
       checkPkgAvailable,
       checkStandardVersion,
@@ -31841,6 +31865,7 @@ async function run() {
         core.info(JSON.stringify(result, null, 2));
       }
     } else {
+
       // monorepo
     }
 

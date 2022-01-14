@@ -1,6 +1,7 @@
 const cp = require("child_process");
 const fs = require("fs");
 const nps = require("path");
+const github = require("@actions/github");
 const { promisify } = require("util");
 const readYaml = require("read-yaml-file");
 const _readJSON = require("read-json-file");
@@ -127,4 +128,73 @@ const parserVersion = (exports.parserVersion = (text) => {
       };
     }
   }
+});
+
+const inferRepoInfo = (exports.inferRepoInfo = async (
+  repoOwner,
+  repoName,
+  { cwd, skipEnvGithubRepoInfer } = {}
+) => {
+  if (!repoOwner && !repoName) {
+    if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
+      [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
+    }
+    if (!repoOwner && !repoName) {
+      const pkgPath = nps.join(cwd, "package.json");
+      if (fs.existsSync(pkgPath) && fs.statSync(pkgPath).isFile()) {
+        const pkg = await readJSON(pkgPath);
+        let repoUrl = pkg.repository;
+        if (repoUrl) {
+          if (typeof repoUrl === "object" && repoUrl.url) {
+            repoUrl = repoUrl.url;
+          }
+
+          const matches = repoUrl.match(
+            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.*)/i
+          );
+          if (matches) {
+            [repoOwner, repoName] = matches[1].split("/");
+          } else {
+            [repoOwner, repoName] = repoUrl.split("/");
+          }
+        }
+      }
+    }
+  }
+
+  return [repoOwner, repoName];
+});
+
+const releaseGitHub = (exports.releaseGitHub = async function ({
+  repoOwner,
+  repoName,
+  draft,
+  tag,
+  githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
+  releaseNote,
+}) {
+  if (!releaseNote.trim()) {
+    throw new Error(`releaseNote is empty when release github`);
+  }
+  if (!githubToken) {
+    throw new Error(`githubToken is empty when release github`);
+  }
+  if (!repoName) {
+    throw new Error(`repoName is empty when release github`);
+  }
+  if (!repoOwner) {
+    throw new Error(`repoOwner is empty when release github`);
+  }
+  if (!tag) {
+    throw new Error(`tag is empty when release github`);
+  }
+
+  const octokit = github.getOctokit(githubToken);
+  return await octokit.repos.createRelease({
+    owner: repoOwner,
+    repo: repoName,
+    tag_name: tag,
+    body: releaseNote.trim(),
+    draft,
+  });
 });

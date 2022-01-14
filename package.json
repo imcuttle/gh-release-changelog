@@ -36,9 +36,14 @@
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
+    "@lerna/package": "^4.0.0",
+    "@lerna/project": "^4.0.0",
     "@moyuyc/visit-tree": "^4.0.2",
     "globby": "^11.1.0",
+    "load-json-file": "^6.2.0",
+    "lodash.pick": "^4.4.0",
     "mdast-util-to-string": "^2.0.0",
+    "p-map": "^4.0.0",
     "read-json-file": "^1.0.1",
     "read-yaml-file": "^2.1.0",
     "remark": "^13.0.0"
