@@ -27,6 +27,8 @@ async function run() {
     const label = core.getInput("label");
     const dryRun = core.getInput("dryRun");
     const checkStandardVersion = core.getInput("checkStandardVersion");
+    const initialDepth = core.getInput("initialDepth");
+    const draft = core.getInput("draft");
     const checkPkgAvailable =
       core.getInput("checkPkgAvailable") == null
         ? true
@@ -48,6 +50,8 @@ async function run() {
 
     const workspaces = await utils.getWorkspaceConfig();
     const options = {
+      initialDepth,
+      draft,
       checkPkgAvailable,
       checkStandardVersion,
       tag,
@@ -74,7 +78,6 @@ async function run() {
         core.info(JSON.stringify(result, null, 2));
       }
     } else {
-
       // monorepo
     }
 

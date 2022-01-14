@@ -4,8 +4,35 @@ inputs:
   token: # id of input
     description: "Github Token"
     required: true
+  tag:
+    description: "Release tag, Get HEAD tag by default"
+    required: false
+  fromTag:
+    description: "Optional: from which tag to target tag"
+    required: false
+  ignoreTests:
+    description: "The ignore changelog text tests rules"
+    required: false
+  changelog:
+    description: "ChangeLog filename"
+    required: false
+  label:
+    description: "label name"
+    required: false
+  checkPkgAvailable:
+    description: "checkPkgAvailable"
+    required: false
   checkStandardVersion:
     description: "Enable check standard version (eg. 1.0.1, 1.2.3-0 is not standard)"
+    required: false
+  repoUrl:
+    description: "The repo url for release (eg. 'imcuttle/gh-release-changelog')"
+    required: false
+  draft:
+    description: "The release is draft"
+    required: false
+  initialDepth:
+    description: "Label heading default depth"
     required: false
   dryRun: # id of input
     description: "Just dry run for log"
