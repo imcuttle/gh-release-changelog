@@ -1,0 +1,19 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+      - @[a-z_]+\/[a-z_]+@[0-9]+.*
+      - [a-z_]+@[0-9]+.*
+
+jobs:
+  gh-release-changelog:
+    # test action works running from the graph
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          dryRun: true

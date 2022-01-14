@@ -49,6 +49,7 @@ async function ghReleaseChangelog({
   githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
   repoOwner,
   repoName,
+  draft = true,
   ignoreTests = defaultIgnoreTests,
   label,
   skipEnvGithubRepoInfer,
@@ -213,7 +214,7 @@ async function ghReleaseChangelog({
       repo: repoName,
       tag_name: tag,
       body: JSON.parse(releaseNote),
-      draft: true,
+      draft,
     });
   }
 }
