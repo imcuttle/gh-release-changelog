@@ -42,9 +42,6 @@ const exec = (cmd) => {
 // most @actions toolkit packages have async methods
 async function run() {
   try {
-    const ms = core.getInput("milliseconds");
-    core.info(`Waiting ${ms} milliseconds ...`);
-
     core.debug(new Date().toTimeString()); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
     const token = core.getInput("token", { required: true });
     const tag =
@@ -60,7 +57,7 @@ async function run() {
 
     const workspaces = await getWorkspaceConfig();
     if (!workspaces || !workspaces.length) {
-      await ghReleaseChangelog({
+      const result = await ghReleaseChangelog({
         tag,
         fromTag,
         githubToken: token,
@@ -71,19 +68,19 @@ async function run() {
         repoName,
         dryRun,
       });
+      if (dryRun) {
+        core.info(JSON.stringify(result, null, 2));
+      }
     } else {
       // monorepo
     }
 
-    core.info(new Date().toTimeString());
-
-    core.setOutput("time", new Date().toTimeString());
+    core.debug(new Date().toTimeString());
   } catch (error) {
     core.setFailed(error.message);
   }
 }
 
-run().then((err) => {
-  core.error(err);
-  process.exitCode = 1;
-});
+core.info(JSON.stringify(process.env, null, 2));
+
+run().then((err) => {});
