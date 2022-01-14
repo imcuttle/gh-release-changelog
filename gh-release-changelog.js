@@ -31,7 +31,10 @@ const isMatchedTag = (heading, tag) => {
   );
 };
 
-const defaultIgnoreTests = [/^<a name=.*><\/a>/];
+const defaultIgnoreTests = [
+  /^<a name=.*><\/a>/,
+  /^\s*Note: Version bump only/,
+];
 
 async function ghReleaseChangelog({
   changelogFilename,
@@ -81,7 +84,7 @@ async function ghReleaseChangelog({
 
   if (!changelogFilename) {
     const files = await globby(
-      ["CHANGELOG.md", "release.md", "release-note.md", "release-notes.md"],
+      ["changelog.md", "release.md", "release-note.md", "release-notes.md"],
       {
         cwd,
         onlyFiles: true,
@@ -96,7 +99,7 @@ async function ghReleaseChangelog({
     throw new Error(`"changelogFilename" is required`);
   }
 
-  changelogFilename = nps.resolve(cwd, changelogFilename)
+  changelogFilename = nps.resolve(cwd, changelogFilename);
   const changelog = await fs.promises.readFile(changelogFilename, "utf-8");
 
   const nodes = [];
@@ -179,6 +182,7 @@ async function ghReleaseChangelog({
       tag,
       fromTag,
       label,
+      depth,
     };
   } else {
     if (!releaseNote.trim()) {
