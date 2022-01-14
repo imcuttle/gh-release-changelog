@@ -1,3 +1,7 @@
+## [1.0.2-7](https://github.com/actions/javascript-action/compare/v1.0.2-6...v1.0.2-7) (2022-01-14)
+
+
+
 ## [1.0.2-6](https://github.com/actions/javascript-action/compare/v1.0.2-5...v1.0.2-6) (2022-01-14)
 
 
