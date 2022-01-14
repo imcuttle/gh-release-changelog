@@ -3,7 +3,7 @@ const process = require("process");
 const cp = require("child_process");
 const path = require("path");
 
-const fixture = (name) => path.resolve("fixture", name);
+const fixture = (name) => path.resolve(__dirname, "fixture", name);
 
 test("ghReleaseChangelog valid", async () => {
   const data = await ghReleaseChangelog({
