@@ -31810,7 +31810,8 @@ async function run() {
     const tag =
       core.getInput("tag") || exec(`git describe --abbrev=0 --tags HEAD`);
     if (!tag) {
-      throw new Error("tag is required");
+      core.warning("tag is required");
+      return;
     }
     const fromTag = core.getInput("fromTag");
     const ignoreTests = core.getInput("ignoreTests");
