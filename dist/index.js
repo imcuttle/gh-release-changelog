@@ -166,7 +166,7 @@ async function ghReleaseChangelog({
               }
             }
 
-            depth = depth || initialDepth;
+            depth = depth || Math.max(1, initialDepth - 1);
             ctx.break();
           }
         }
@@ -31850,7 +31850,7 @@ async function run() {
   }
 }
 
-core.info(JSON.stringify(process.env, null, 2));
+core.debug(JSON.stringify(process.env, null, 2));
 
 run();
 

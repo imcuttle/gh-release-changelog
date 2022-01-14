@@ -2,7 +2,7 @@ name: "gh-release-changelog"
 description: "GitHub Release by Changelog"
 inputs:
   token: # id of input
-    description: "github token"
+    description: "Github Token"
     required: true
 #outputs:
 #  time: # output will be available to future steps

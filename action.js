@@ -112,6 +112,6 @@ async function run() {
   }
 }
 
-core.info(JSON.stringify(process.env, null, 2));
+core.debug(JSON.stringify(process.env, null, 2));
 
 run();

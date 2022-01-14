@@ -160,7 +160,7 @@ async function ghReleaseChangelog({
               }
             }
 
-            depth = depth || initialDepth;
+            depth = depth || Math.max(1, initialDepth - 1);
             ctx.break();
           }
         }
