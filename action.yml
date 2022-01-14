@@ -4,7 +4,6 @@ inputs:
   token: # id of input
     description: "github token"
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
 #outputs:
 #  time: # output will be available to future steps
 #    description: "The current time after waiting"
