@@ -8,6 +8,7 @@ const remark = require("remark");
 const { promisify } = require("util");
 const nodeToString = require("mdast-util-to-string");
 const _readJSON = require("read-json-file");
+const utils = require("./utils");
 const readJSON = promisify(_readJSON);
 
 const execSyncStdout = (cmd) => {
@@ -45,7 +46,19 @@ async function ghReleaseChangelog({
   ignoreTests = defaultIgnoreTests,
   label,
   skipEnvGithubRepoInfer,
+  checkPkgAvailable = false,
 }) {
+  if (checkPkgAvailable) {
+    const pkg = await utils.getPkg(cwd);
+    if (!pkg) {
+      throw new Error(`CheckPkgAvailable package is not found`);
+    }
+    const spec = pkg.version ? `${pkg.name}@${pkg.version}` : pkg.name;
+    if (!(await utils.checkPackageAvailable(spec))) {
+      throw new Error(`CheckPkgAvailable ${spec} is unpublished`);
+    }
+  }
+
   if (!repoOwner && !repoName) {
     if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
       [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
@@ -79,6 +92,8 @@ async function ghReleaseChangelog({
   if (!repoName) {
     throw new Error(`"repoName" is required`);
   }
+
+  utils.checkPackageAvailable(``);
 
   if (!changelogFilename) {
     const files = await globby(

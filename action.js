@@ -56,11 +56,16 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getInput("dryRun");
+    const checkPkgAvailable =
+      core.getInput("checkPkgAvailable") == null
+        ? true
+        : core.getInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
 
     const workspaces = await getWorkspaceConfig();
     if (!workspaces || !workspaces.length) {
       const result = await ghReleaseChangelog({
+        checkPkgAvailable,
         tag,
         fromTag,
         githubToken: token,

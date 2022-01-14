@@ -14,6 +14,7 @@ const remark = __nccwpck_require__(2081);
 const { promisify } = __nccwpck_require__(1669);
 const nodeToString = __nccwpck_require__(5789);
 const _readJSON = __nccwpck_require__(4085);
+const utils = __nccwpck_require__(1252);
 const readJSON = promisify(_readJSON);
 
 const execSyncStdout = (cmd) => {
@@ -51,7 +52,19 @@ async function ghReleaseChangelog({
   ignoreTests = defaultIgnoreTests,
   label,
   skipEnvGithubRepoInfer,
+  checkPkgAvailable = false,
 }) {
+  if (checkPkgAvailable) {
+    const pkg = await utils.getPkg(cwd);
+    if (!pkg) {
+      throw new Error(`CheckPkgAvailable package is not found`);
+    }
+    const spec = pkg.version ? `${pkg.name}@${pkg.version}` : pkg.name;
+    if (!(await utils.checkPackageAvailable(spec))) {
+      throw new Error(`CheckPkgAvailable ${spec} is unpublished`);
+    }
+  }
+
   if (!repoOwner && !repoName) {
     if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
       [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
@@ -85,6 +98,8 @@ async function ghReleaseChangelog({
   if (!repoName) {
     throw new Error(`"repoName" is required`);
   }
+
+  utils.checkPackageAvailable(``);
 
   if (!changelogFilename) {
     const files = await globby(
@@ -31397,6 +31412,107 @@ function factory(key, options) {
 
 /***/ }),
 
+/***/ 1252:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+const cp = __nccwpck_require__(3129);
+const fs = __nccwpck_require__(5747);
+const nps = __nccwpck_require__(5622);
+const { promisify } = __nccwpck_require__(1669);
+const readYaml = __nccwpck_require__(2920);
+const _readJSON = __nccwpck_require__(4085);
+const readJSON = promisify(_readJSON);
+
+const runCommand = (exports.runCommand = function (command, config = {}) {
+  return new Promise((resolve, reject) => {
+    const child = cp.exec(command, {
+      ...config,
+      stdio: "pipe",
+    });
+
+    let error;
+    child.on("error", (err) => {
+      error = err;
+    });
+
+    const stdouts = [];
+    child.stdout.on("data", (chunk) => {
+      stdouts.push(Buffer.from(chunk));
+    });
+
+    const stderrs = [];
+    child.stderr.on("data", (chunk) => {
+      stderrs.push(Buffer.from(chunk));
+    });
+
+    child.on("exit", (code) => {
+      const data = {
+        error,
+        exitCode: child.exitCode,
+        stdout: Buffer.concat(stdouts).toString(config.encoding || "utf-8"),
+        stderr: Buffer.concat(stderrs).toString(config.encoding || "utf-8"),
+      };
+      if (code !== 0) {
+        const err = new Error(
+          `Run command \`${command}\` failed with exitCode ${code}.\n${JSON.stringify(
+            data,
+            null,
+            2
+          )}`
+        );
+        Object.assign(err, data);
+        reject(err);
+        return;
+      }
+      resolve(data);
+    });
+  });
+});
+
+exports.checkPackageAvailable = async function (spec, config) {
+  const result = await runCommand(
+    `npm view ${JSON.stringify(spec)} version --json`,
+    config
+  );
+
+  return !!result.stdout;
+};
+
+const existsFile = (exports.existsFile = (filename) => {
+  return fs.existsSync(filename) && fs.statSync(filename).isFile();
+});
+
+const getPkg = (exports.getPkg = async function (cwd) {
+  const pkgPath = nps.join(cwd, "package.json");
+  if (existsFile(pkgPath)) {
+    return await readJSON(pkgPath);
+  }
+});
+
+const getWorkspaceConfig = (exports.getWorkspaceConfig = async function (
+  cwd = process.cwd()
+) {
+  const pnpmWorkSpace = nps.join(cwd, "pnpm-workspace.yaml");
+  if (existsFile(pnpmWorkSpace)) {
+    return (await readYaml(pnpmWorkSpace)).packages;
+  }
+
+  const pkg = await getPkg(cwd);
+  if (pkg && pkg.workspaces) {
+    return pkg.workspaces;
+  }
+
+  const lernaPath = nps.join(cwd, "lerna.json");
+  if (existsFile(lernaPath)) {
+    return (await readJSON(lernaPath)).packages;
+  }
+});
+
+// exports.checkPackageAvailable("npm@5").then(console.log, console.error);
+
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -31640,11 +31756,16 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getInput("dryRun");
+    const checkPkgAvailable =
+      core.getInput("checkPkgAvailable") == null
+        ? true
+        : core.getInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
 
     const workspaces = await getWorkspaceConfig();
     if (!workspaces || !workspaces.length) {
       const result = await ghReleaseChangelog({
+        checkPkgAvailable,
         tag,
         fromTag,
         githubToken: token,
