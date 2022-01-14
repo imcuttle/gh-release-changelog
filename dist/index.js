@@ -31826,7 +31826,15 @@ async function run() {
       repoOwner,
       repoName,
       dryRun,
+    };
+
+    if (options.checkStandardVersion && !utils.isStandardVersion(tag)) {
+      core.warning(
+        `${tag} is not a standard version, so skip it. you can pass checkStandardVersion=false for skipping the checker`
+      );
+      return;
     }
+
     if (!workspaces || !workspaces.length) {
       const result = await ghReleaseChangelog(options);
       if (dryRun) {
