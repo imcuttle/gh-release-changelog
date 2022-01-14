@@ -4,6 +4,12 @@ inputs:
   token: # id of input
     description: "Github Token"
     required: true
+  checkStandardVersion:
+    description: "Enable check standard version (eg. 1.0.1, 1.2.3-0 is not standard)"
+    required: false
+  dryRun: # id of input
+    description: "Just dry run for log"
+    required: false
 #outputs:
 #  time: # output will be available to future steps
 #    description: "The current time after waiting"

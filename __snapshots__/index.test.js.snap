@@ -15,7 +15,7 @@ Object {
 
 exports[`ghReleaseChangelog lerna-sub version bump only 1`] = `
 Object {
-  "depth": 2,
+  "depth": 1,
   "fromTag": undefined,
   "githubToken": "noop",
   "label": "@rcp/abc",

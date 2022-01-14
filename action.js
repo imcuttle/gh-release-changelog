@@ -89,7 +89,7 @@ async function run() {
       repoName,
       dryRun,
     };
-
+    core.debug("Input Options:\n" + JSON.stringify(options, null, 2));
     if (options.checkStandardVersion && !utils.isStandardVersion(tag)) {
       core.warning(
         `${tag} is not a standard version, so skip it. you can pass checkStandardVersion=false for skipping the checker`
@@ -111,7 +111,5 @@ async function run() {
     core.setFailed(error.message);
   }
 }
-
-core.debug(JSON.stringify(process.env, null, 2));
 
 run();

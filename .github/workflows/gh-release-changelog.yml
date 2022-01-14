@@ -9,12 +9,11 @@ jobs:
   gh-release-changelog:
     # test action works running from the graph
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_STEP_DEBUG: true
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkStandardVersion: false
-          dryRun: true
+        env:
+          ACTIONS_STEP_DEBUG: true
