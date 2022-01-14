@@ -46,6 +46,9 @@ async function run() {
     const token = core.getInput("token", { required: true });
     const tag =
       core.getInput("tag") || exec(`git describe --abbrev=0 --tags HEAD`);
+    if (!tag) {
+      throw new Error("tag is required");
+    }
     const fromTag =
       core.getInput("fromTag") ||
       exec(`git describe --abbrev=0 --tags ${tag}^`);
