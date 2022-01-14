@@ -19,15 +19,10 @@ const execSyncStdout = (cmd) => {
   }
 };
 
-const isVersionText = (heading) => {
-  heading = heading.trim();
-  return /^\d+\.\d+(\.\d+)?/.test(heading) || /^[vV]\d+?/.test(heading);
-};
-
 const isMatchedTag = (heading, tag) => {
   const normalizedTag = tag.replace(/^v/, "");
   return (
-    isVersionText(heading) &&
+    utils.isVersionText(heading) &&
     (heading.startsWith(normalizedTag) || heading.startsWith(tag))
   );
 };
@@ -94,8 +89,6 @@ async function ghReleaseChangelog({
     throw new Error(`"repoName" is required`);
   }
 
-  utils.checkPackageAvailable(``);
-
   if (!changelogFilename) {
     const files = await globby(
       ["changelog.md", "release.md", "release-note.md", "release-notes.md"],
@@ -138,7 +131,7 @@ async function ghReleaseChangelog({
               const text = nodeToString(nextNode);
               if (
                 nextNode.type !== "heading" ||
-                !isVersionText(text) ||
+                !utils.isVersionText(text) ||
                 (fromTag && !isMatchedTag(text, fromTag))
               ) {
                 if (nextNode.type === "heading") {

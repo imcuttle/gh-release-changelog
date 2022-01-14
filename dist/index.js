@@ -25,15 +25,10 @@ const execSyncStdout = (cmd) => {
   }
 };
 
-const isVersionText = (heading) => {
-  heading = heading.trim();
-  return /^\d+\.\d+(\.\d+)?/.test(heading) || /^[vV]\d+?/.test(heading);
-};
-
 const isMatchedTag = (heading, tag) => {
   const normalizedTag = tag.replace(/^v/, "");
   return (
-    isVersionText(heading) &&
+    utils.isVersionText(heading) &&
     (heading.startsWith(normalizedTag) || heading.startsWith(tag))
   );
 };
@@ -100,8 +95,6 @@ async function ghReleaseChangelog({
     throw new Error(`"repoName" is required`);
   }
 
-  utils.checkPackageAvailable(``);
-
   if (!changelogFilename) {
     const files = await globby(
       ["changelog.md", "release.md", "release-note.md", "release-notes.md"],
@@ -144,7 +137,7 @@ async function ghReleaseChangelog({
               const text = nodeToString(nextNode);
               if (
                 nextNode.type !== "heading" ||
-                !isVersionText(text) ||
+                !utils.isVersionText(text) ||
                 (fromTag && !isMatchedTag(text, fromTag))
               ) {
                 if (nextNode.type === "heading") {
@@ -31509,7 +31502,34 @@ const getWorkspaceConfig = (exports.getWorkspaceConfig = async function (
   }
 });
 
-// exports.checkPackageAvailable("npm@5").then(console.log, console.error);
+const versionRegs = [
+  /^(\d+\.\d+(?:\.\d+)?)/,
+  /^[vV](\d+\.\d+(?:\.\d+)?)/,
+  /^(\w+)@(\d+\.\d+(?:\.\d+)?)/,
+  /^(@\w+)@(\d+\.\d+(?:\.\d+)?)/,
+];
+
+const isVersionText = (exports.isVersionText = (text) => {
+  return !!parserVersion(text)
+});
+
+const parserVersion = (exports.parserVersion = (text) => {
+  text = text.trim();
+  for (const reg of versionRegs) {
+    const m = text.match(reg);
+    if (m) {
+      if (m.length === 2) {
+        return {
+          version: m[1],
+        };
+      }
+      return {
+        version: m[2],
+        name: m[1],
+      };
+    }
+  }
+});
 
 
 /***/ }),
@@ -31707,6 +31727,7 @@ const readYaml = __nccwpck_require__(2920);
 const cp = __nccwpck_require__(3129);
 const ghReleaseChangelog = __nccwpck_require__(7447);
 const _readJSON = __nccwpck_require__(4085);
+const utils = __nccwpck_require__(1252);
 const readJSON = promisify(_readJSON);
 
 async function getWorkspaceConfig(cwd = process.cwd()) {
@@ -31762,6 +31783,19 @@ async function run() {
         ? true
         : core.getInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
+
+    const tagParsed = utils.parserVersion(tag);
+    if (!tagParsed) {
+      core.warning(`tag: ${tag} is ignored.`);
+      return;
+    }
+    if (fromTag) {
+      const fromTagParsed = utils.parserVersion(fromTag);
+      if (!fromTagParsed) {
+        core.warning(`fromTag: ${fromTag} is ignored.`);
+        return;
+      }
+    }
 
     const workspaces = await getWorkspaceConfig();
     if (!workspaces || !workspaces.length) {

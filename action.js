@@ -6,6 +6,7 @@ const readYaml = require("read-yaml-file");
 const cp = require("child_process");
 const ghReleaseChangelog = require("./gh-release-changelog");
 const _readJSON = require("read-json-file");
+const utils = require("./utils");
 const readJSON = promisify(_readJSON);
 
 async function getWorkspaceConfig(cwd = process.cwd()) {
@@ -61,6 +62,19 @@ async function run() {
         ? true
         : core.getInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
+
+    const tagParsed = utils.parserVersion(tag);
+    if (!tagParsed) {
+      core.warning(`tag: ${tag} is ignored.`);
+      return;
+    }
+    if (fromTag) {
+      const fromTagParsed = utils.parserVersion(fromTag);
+      if (!fromTagParsed) {
+        core.warning(`fromTag: ${fromTag} is ignored.`);
+        return;
+      }
+    }
 
     const workspaces = await getWorkspaceConfig();
     if (!workspaces || !workspaces.length) {

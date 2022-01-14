@@ -91,4 +91,31 @@ const getWorkspaceConfig = (exports.getWorkspaceConfig = async function (
   }
 });
 
-// exports.checkPackageAvailable("npm@5").then(console.log, console.error);
+const versionRegs = [
+  /^(\d+\.\d+(?:\.\d+)?)/,
+  /^[vV](\d+\.\d+(?:\.\d+)?)/,
+  /^(\w+)@(\d+\.\d+(?:\.\d+)?)/,
+  /^(@\w+)@(\d+\.\d+(?:\.\d+)?)/,
+];
+
+const isVersionText = (exports.isVersionText = (text) => {
+  return !!parserVersion(text)
+});
+
+const parserVersion = (exports.parserVersion = (text) => {
+  text = text.trim();
+  for (const reg of versionRegs) {
+    const m = text.match(reg);
+    if (m) {
+      if (m.length === 2) {
+        return {
+          version: m[1],
+        };
+      }
+      return {
+        version: m[2],
+        name: m[1],
+      };
+    }
+  }
+});
