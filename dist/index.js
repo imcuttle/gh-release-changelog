@@ -31771,9 +31771,7 @@ async function run() {
     if (!tag) {
       throw new Error("tag is required");
     }
-    const fromTag =
-      core.getInput("fromTag") ||
-      exec(`git describe --abbrev=0 --tags ${tag}^`);
+    const fromTag = core.getInput("fromTag");
     const ignoreTests = core.getInput("ignoreTests");
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
