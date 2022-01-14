@@ -63,13 +63,13 @@ async function run() {
 
     const tagParsed = utils.parserVersion(tag);
     if (!tagParsed) {
-      core.warning(`tag: ${tag} is ignored.`);
+      core.warning(`tag "${tag}" is ignored.`);
       return;
     }
     if (fromTag) {
       const fromTagParsed = utils.parserVersion(fromTag);
       if (!fromTagParsed) {
-        core.warning(`fromTag: ${fromTag} is ignored.`);
+        core.warning(`fromTag "${fromTag}" is ignored.`);
         return;
       }
     }
