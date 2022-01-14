@@ -31,10 +31,7 @@ const isMatchedTag = (heading, tag) => {
   );
 };
 
-const defaultIgnoreTests = [
-  /^<a name=.*><\/a>/,
-  /^\s*Note: Version bump only/,
-];
+const defaultIgnoreTests = [/^<a name=.*><\/a>/, /^\s*Note: Version bump only/];
 
 async function ghReleaseChangelog({
   changelogFilename,
@@ -47,9 +44,10 @@ async function ghReleaseChangelog({
   repoName,
   ignoreTests = defaultIgnoreTests,
   label,
+  skipEnvGithubRepoInfer,
 }) {
   if (!repoOwner && !repoName) {
-    if (process.env.GITHUB_REPOSITORY) {
+    if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
       [repoOwner, repoName] = process.env.GITHUB_REPOSITORY.split("/");
     }
     if (!repoOwner && !repoName) {

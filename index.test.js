@@ -12,6 +12,7 @@ test("ghReleaseChangelog valid", async () => {
     dryRun: true,
     githubToken: "noop",
     label: "@rcp/abc",
+    skipEnvGithubRepoInfer: true,
   });
   expect(data.changelogFilename).toBe(fixture("valid/CHANGELOG.md"));
   delete data.changelogFilename;
@@ -25,6 +26,7 @@ test("ghReleaseChangelog lerna-sub not-found", async () => {
     dryRun: true,
     githubToken: "noop",
     label: "@rcp/abc",
+    skipEnvGithubRepoInfer: true,
   });
   expect(data.changelogFilename).toBe(fixture("lerna-sub/CHANGELOG.md"));
   delete data.changelogFilename;
@@ -38,6 +40,7 @@ test("ghReleaseChangelog lerna-sub version bump only", async () => {
     dryRun: true,
     githubToken: "noop",
     label: "@rcp/abc",
+    skipEnvGithubRepoInfer: true,
   });
   expect(data.changelogFilename).toBe(fixture("lerna-sub/CHANGELOG.md"));
   delete data.changelogFilename;
