@@ -2,6 +2,8 @@ const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require("./");
 const path = require("path");
 const { testCreateRelease } = require("@actions/github");
 
+process.env.GITHUB_TOKEN = 'noop'
+
 const fixture = (name) => path.resolve(__dirname, "fixture", name);
 
 jest.mock("@actions/github", () => {
