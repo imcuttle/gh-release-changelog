@@ -34,7 +34,7 @@ Array [
 *   remove global option
 
 Full Changelog: [v1.0.0](https://github.com/imcuttle/rcp/commits/v1.0.0)",
-    "draft": true,
+    "draft": false,
     "owner": "imcuttle",
     "repo": "rcp",
     "tag_name": "v1.0.0",
