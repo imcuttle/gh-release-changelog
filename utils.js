@@ -212,13 +212,14 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
       draft
     )}\n\n${releaseNote.trim()}`
   );
-  octokit.request("PUT /authorizations/clients/{client_id}");
-  return await octokit.repos.createRelease({
+  return await octokit.request("POST /repos/{owner}/{repo}/releases", {
     owner: repoOwner,
     repo: repoName,
     tag_name: tag,
     body: releaseNote.trim(),
     draft,
     prerelease,
+    discussion_category_name,
+    generate_release_notes,
   });
 });
