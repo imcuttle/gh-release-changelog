@@ -33,7 +33,10 @@ async function run() {
     const initialDepth = core.getInput("initialDepth");
     const draft = core.getBooleanInput("draft");
     const checkPkgAvailable = core.getBooleanInput("checkPkgAvailable");
-    const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
+    let [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
+    [repoOwner, repoName] = utils.inferRepoInfo(repoOwner, repoName, {
+      skipEnvGithubRepoInfer: false,
+    });
 
     const tagParsed = utils.parserVersion(tag);
     if (!tagParsed) {
