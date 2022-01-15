@@ -6,6 +6,8 @@ Create GitHub Release from changelog and tag push.
 
 **Supports monorepo(lerna/pnpm/npm) and normal repo**
 
+![image](https://user-images.githubusercontent.com/13509258/149616401-be259428-117a-4e64-a169-b1e698aba928.png)
+
 `CHANGELOG.md` syntax likes like:
 ```md
 ## [1.0.3](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2...v1.0.3) (2022-01-15)
