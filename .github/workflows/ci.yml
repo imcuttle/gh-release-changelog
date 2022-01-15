@@ -18,11 +18,8 @@ jobs:
       - run: npm test
 
   gh-release-changelog:
-    # test action works running from the graph
     runs-on: ubuntu-latest
     needs: [test]
-    env:
-      ACTIONS_RUNNER_DEBUG: true
     steps:
       - uses: actions/checkout@v2
       - uses: ./
@@ -31,5 +28,3 @@ jobs:
           tag: 'v1.0.2-beta.0'
           checkStandardVersion: false
           checkPkgAvailable: false
-        env:
-          ACTIONS_STEP_DEBUG: true

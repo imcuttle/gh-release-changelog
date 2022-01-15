@@ -134,7 +134,7 @@ const parserVersion = (exports.parserVersion = (text) => {
 const inferRepoInfo = (exports.inferRepoInfo = async (
   repoOwner,
   repoName,
-  { cwd, skipEnvGithubRepoInfer } = {}
+  { cwd = process.cwd(), skipEnvGithubRepoInfer } = {}
 ) => {
   if (!repoOwner && !repoName) {
     if (!skipEnvGithubRepoInfer && process.env.GITHUB_REPOSITORY) {
