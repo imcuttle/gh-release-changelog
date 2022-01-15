@@ -35,12 +35,11 @@ root/
 ## Usage
 
 ```yaml
-# gh-release-changelog.yml
-name: "Github Release"
+# ci.yml
+name: "CI"
 on:
-  push:
-    tags:
-      - "**"
+  - push
+  - pull_request
 jobs:
   test:
     runs-on: ubuntu-latest
