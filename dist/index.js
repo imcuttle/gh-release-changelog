@@ -138,6 +138,7 @@ const remark = __nccwpck_require__(2081);
 const { promisify } = __nccwpck_require__(1669);
 const nodeToString = __nccwpck_require__(5789);
 const _readJSON = __nccwpck_require__(4085);
+const escapeReg = __nccwpck_require__(8691);
 const utils = __nccwpck_require__(1252);
 const readJSON = promisify(_readJSON);
 
@@ -283,14 +284,14 @@ async function ghReleaseChangelog({
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
                     );
-                    const matchedTag = tags.find((tag) =>
-                      isMatchedTag(tmp.version, tag)
-                    );
+                    const matchedTag = tags.find((tag) => {
+                      new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
+                    });
                     console.log({
                       tags,
-                      'tmp.version': tmp.version,
-                      matchedTag
-                    })
+                      "tmp.version": tmp.version,
+                      matchedTag,
+                    });
                     if (matchedTag) {
                       fromTag = matchedTag;
                     }
@@ -2361,7 +2362,7 @@ function highlight(code, options = {}) {
 
 "use strict";
 
-const escapeStringRegexp = __nccwpck_require__(8691);
+const escapeStringRegexp = __nccwpck_require__(6438);
 const ansiStyles = __nccwpck_require__(2068);
 const stdoutColor = __nccwpck_require__(9318).stdout;
 
@@ -2588,6 +2589,25 @@ Object.defineProperties(Chalk.prototype, styles);
 module.exports = Chalk(); // eslint-disable-line new-cap
 module.exports.supportsColor = stdoutColor;
 module.exports.default = module.exports; // For TypeScript
+
+
+/***/ }),
+
+/***/ 6438:
+/***/ ((module) => {
+
+"use strict";
+
+
+var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+
+module.exports = function (str) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	return str.replace(matchOperatorsRe, '\\$&');
+};
 
 
 /***/ }),
@@ -13164,14 +13184,16 @@ module.exports = errorEx;
 "use strict";
 
 
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-
-module.exports = function (str) {
-	if (typeof str !== 'string') {
+module.exports = string => {
+	if (typeof string !== 'string') {
 		throw new TypeError('Expected a string');
 	}
 
-	return str.replace(matchOperatorsRe, '\\$&');
+	// Escape characters with special meaning either inside or outside character sets.
+	// Use a simple backslash escape when it’s always valid, and a \unnnn escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
+	return string
+		.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+		.replace(/-/g, '\\x2d');
 };
 
 

@@ -8,6 +8,7 @@ const remark = require("remark");
 const { promisify } = require("util");
 const nodeToString = require("mdast-util-to-string");
 const _readJSON = require("read-json-file");
+const escapeReg = require("escape-string-regexp");
 const utils = require("./utils");
 const readJSON = promisify(_readJSON);
 
@@ -153,14 +154,14 @@ async function ghReleaseChangelog({
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
                     );
-                    const matchedTag = tags.find((tag) =>
-                      isMatchedTag(tmp.version, tag)
-                    );
+                    const matchedTag = tags.find((tag) => {
+                      new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
+                    });
                     console.log({
                       tags,
-                      'tmp.version': tmp.version,
-                      matchedTag
-                    })
+                      "tmp.version": tmp.version,
+                      matchedTag,
+                    });
                     if (matchedTag) {
                       fromTag = matchedTag;
                     }

@@ -39,6 +39,7 @@
     "@lerna/package": "^4.0.0",
     "@lerna/project": "^4.0.0",
     "@moyuyc/visit-tree": "^4.0.2",
+    "escape-string-regexp": "^4.0.0",
     "globby": "^11.1.0",
     "load-json-file": "^6.2.0",
     "lodash.pick": "^4.4.0",
