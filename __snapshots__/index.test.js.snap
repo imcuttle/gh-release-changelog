@@ -45,6 +45,52 @@ Array [
 ]
 `;
 
+exports[`ghReleaseChangelog valid-long v1.0.2 1`] = `
+Array [
+  Array [
+    Object {
+      "owner": "imcuttle",
+      "ref": "tags",
+      "repo": "gh-release-changelog",
+    },
+  ],
+]
+`;
+
+exports[`ghReleaseChangelog valid-long v1.0.2-beta.3 1`] = `
+Array [
+  Array [
+    Object {
+      "owner": "imcuttle",
+      "ref": "tags",
+      "repo": "gh-release-changelog",
+    },
+  ],
+  Array [
+    Object {
+      "accept": undefined,
+      "body": "### Bug Fixes
+
+*   some thing 1.0.2-beta.3 #1 @imcuttle ([a8bc65c](https://github.com/imcuttle/gh-release-changelog/commit/a8bc65c21d65e0b6a6c3f90bced3647363650112))
+
+### BREAKING CHANGES
+
+*   some changes...
+
+**Full Changelog**: https://github.com/imcuttle/gh-release-changelog/commits/v1.0.2-beta.3",
+      "discussion_category_name": undefined,
+      "draft": false,
+      "generate_release_notes": undefined,
+      "owner": "imcuttle",
+      "prerelease": undefined,
+      "repo": "gh-release-changelog",
+      "tag_name": "v1.0.2-beta.3",
+      "target_commitish": undefined,
+    },
+  ],
+]
+`;
+
 exports[`ghReleaseChangelogMonorepo lerna 1`] = `
 Array [
   Object {

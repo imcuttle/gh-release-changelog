@@ -38,6 +38,37 @@ describe("ghReleaseChangelog", () => {
     expect(testCreateRelease).toHaveBeenCalledTimes(2);
     expect(testCreateRelease.mock.calls).toMatchSnapshot();
   });
+  test("valid-long v1.0.2", async () => {
+    await ghReleaseChangelog({
+      cwd: fixture("valid-long"),
+      tag: "v1.0.2",
+      githubToken: "noop",
+      skipEnvGithubRepoInfer: true,
+      repoName: "gh-release-changelog",
+      repoOwner: "imcuttle",
+      checkStandardVersion: true,
+      checkPkgAvailable: true,
+    });
+
+    expect(testCreateRelease.mock.calls).toMatchSnapshot();
+    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+  });
+
+  test("valid-long v1.0.2-beta.3", async () => {
+    await ghReleaseChangelog({
+      cwd: fixture("valid-long"),
+      tag: "v1.0.2-beta.3",
+      githubToken: "noop",
+      skipEnvGithubRepoInfer: true,
+      repoName: "gh-release-changelog",
+      repoOwner: "imcuttle",
+      checkStandardVersion: false,
+      checkPkgAvailable: true,
+    });
+
+    expect(testCreateRelease.mock.calls).toMatchSnapshot();
+    expect(testCreateRelease).toHaveBeenCalledTimes(2);
+  });
 
   test("lerna-sub not-found", async () => {
     await ghReleaseChangelog({

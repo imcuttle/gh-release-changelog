@@ -60,7 +60,8 @@ async function ghReleaseChangelog({
     if (!pkg) {
       throw new Error(`CheckPkgAvailable package is not found`);
     }
-    const spec = pkg.version ? `${pkg.name}@${pkg.version}` : pkg.name;
+    const { version } = utils.parserVersion(tag) || {};
+    const spec = version ? `${pkg.name}@${version}` : pkg.name;
     if (!(await utils.checkPackageAvailable(spec))) {
       throw new Error(`CheckPkgAvailable ${spec} is unpublished`);
     }
@@ -105,7 +106,7 @@ async function ghReleaseChangelog({
       await visitTree(
         gnode,
         async (node, ctx) => {
-          if (node.type === "heading") {
+          if (node.type === "heading" && !breakNode) {
             const heading = nodeToString(node).trim();
             if (isMatchedTag(heading, tag)) {
               // depth = initialDepth
@@ -137,7 +138,9 @@ async function ghReleaseChangelog({
                   if (ignoreTests.some((rule) => rule.test(text))) {
                     continue;
                   }
-                  nodes.push(nextNode);
+                  nodes.push(
+                    ((i) => ctx.parent.children[i]).bind(null, index - 1)
+                  );
                 } else {
                   if (!fromTag && nextNode.type === "heading") {
                     const tmp = utils.parserVersion(text);
@@ -220,6 +223,7 @@ async function ghReleaseChangelog({
   await h.process(changelog);
 
   let releaseNote = nodes
+    .map((fn) => fn())
     .map((node) => remark().stringify(node))
     .join("\n")
     .trim();
