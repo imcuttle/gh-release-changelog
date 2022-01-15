@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "prepare": "ncc build action.js -o dist --source-map --license licenses.txt",
+    "prepublishOnly": "ncc build action.js -o dist --source-map --license licenses.txt",
     "test": "jest",
-    "all": "npm run lint && npm run prepare && npm run test",
+    "all": "npm run lint && npm run prepublishOnly && npm run test",
     "version": "npm run changelog",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/actions/javascript-action#readme",
   "husky": {
     "hooks": {
-      "pre-commit": "npm run prepare && git add dist"
+      "pre-commit": "npm run prepublishOnly && git add dist"
     }
   },
   "dependencies": {

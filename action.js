@@ -29,6 +29,11 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getBooleanInput("dryRun");
+    const generate_release_notes = core.getBooleanInput(
+      "generate_release_notes"
+    );
+    const prerelease = core.getBooleanInput("prerelease");
+    const discussion_category_name = core.getInput("discussion_category_name");
     const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
     const initialDepth = Number(core.getInput("initialDepth"));
     const draft = core.getBooleanInput("draft");
@@ -66,6 +71,11 @@ async function run() {
       repoOwner,
       repoName,
       dryRun,
+      extraReleaseData: {
+        prerelease,
+        discussion_category_name,
+        generate_release_notes,
+      },
     };
     core.info("Input Options:\n" + JSON.stringify(options, null, 2));
     if (options.checkStandardVersion && !utils.isStandardVersion(tag)) {

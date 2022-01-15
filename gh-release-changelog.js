@@ -45,6 +45,7 @@ async function ghReleaseChangelog({
   initialDepth = 4,
   checkPkgAvailable = false,
   checkStandardVersion = true,
+  extraReleaseData,
 }) {
   if (!tag) {
     throw new Error(`tag is required`);
@@ -188,6 +189,7 @@ async function ghReleaseChangelog({
       return;
     }
     return utils.releaseGitHub({
+      ...extraReleaseData,
       repoOwner,
       repoName,
       draft,

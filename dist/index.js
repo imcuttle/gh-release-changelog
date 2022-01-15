@@ -175,6 +175,7 @@ async function ghReleaseChangelog({
   initialDepth = 4,
   checkPkgAvailable = false,
   checkStandardVersion = true,
+  extraReleaseData,
 }) {
   if (!tag) {
     throw new Error(`tag is required`);
@@ -318,6 +319,7 @@ async function ghReleaseChangelog({
       return;
     }
     return utils.releaseGitHub({
+      ...extraReleaseData,
       repoOwner,
       repoName,
       draft,
@@ -48929,16 +48931,16 @@ const inferRepoInfo = (exports.inferRepoInfo = async (
   return [repoOwner, repoName];
 });
 
-const IS_GITHUB_ACTIONS = !!process.env.GITHUB_ACTIONS
+const IS_GITHUB_ACTIONS = !!process.env.GITHUB_ACTIONS;
 const githubActionLogger = (exports.githubActionLogger = {
   info: (message) => {
-    IS_GITHUB_ACTIONS && core.info(message)
+    IS_GITHUB_ACTIONS && core.info(message);
   },
   warning: (message) => {
-    IS_GITHUB_ACTIONS && core.warning(message)
+    IS_GITHUB_ACTIONS && core.warning(message);
   },
   error: (message) => {
-    IS_GITHUB_ACTIONS && core.error(message)
+    IS_GITHUB_ACTIONS && core.error(message);
   },
 });
 
@@ -48946,6 +48948,9 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   repoOwner,
   repoName,
   draft,
+  prerelease,
+  discussion_category_name,
+  generate_release_notes,
   tag,
   githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
   releaseNote,
@@ -48972,12 +48977,14 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
       draft
     )}\n\n${releaseNote.trim()}`
   );
+  octokit.request("PUT /authorizations/clients/{client_id}");
   return await octokit.repos.createRelease({
     owner: repoOwner,
     repo: repoName,
     tag_name: tag,
     body: releaseNote.trim(),
     draft,
+    prerelease,
   });
 });
 
@@ -49244,6 +49251,11 @@ async function run() {
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
     const dryRun = core.getBooleanInput("dryRun");
+    const generate_release_notes = core.getBooleanInput(
+      "generate_release_notes"
+    );
+    const prerelease = core.getBooleanInput("prerelease");
+    const discussion_category_name = core.getInput("discussion_category_name");
     const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
     const initialDepth = Number(core.getInput("initialDepth"));
     const draft = core.getBooleanInput("draft");
@@ -49281,6 +49293,11 @@ async function run() {
       repoOwner,
       repoName,
       dryRun,
+      extraReleaseData: {
+        prerelease,
+        discussion_category_name,
+        generate_release_notes,
+      },
     };
     core.info("Input Options:\n" + JSON.stringify(options, null, 2));
     if (options.checkStandardVersion && !utils.isStandardVersion(tag)) {
