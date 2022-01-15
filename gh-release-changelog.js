@@ -237,7 +237,7 @@ async function ghReleaseChangelog({
     } else {
       url = `https://github.com/${repoOwner}/${repoName}/commits/${tag}`;
     }
-    releaseNote = releaseNote + `\n\n**Full Changelog**: [${tag}](${url})`;
+    releaseNote = releaseNote + `\n\n**Full Changelog**: ${url}`;
 
     if (depth && label) {
       releaseNote = "#".repeat(depth) + ` ${label}\n\n` + releaseNote;
