@@ -1,3 +1,12 @@
+## [1.0.3](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2...v1.0.3) (2022-01-15)
+
+
+### Bug Fixes
+
+* release note generate ([ca47484](https://github.com/imcuttle/gh-release-changelog/commit/ca474849b15a56e74af9165cc193cb1c960f93a6))
+
+
+
 ## [1.0.2](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2-beta.3...v1.0.2) (2022-01-15)
 
 
