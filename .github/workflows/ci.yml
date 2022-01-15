@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - "**"
-#    tags:
-#      - "**"
+    tags:
+      - "**"
 
 jobs:
   test:
