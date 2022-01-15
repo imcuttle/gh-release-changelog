@@ -333,11 +333,11 @@ async function ghReleaseChangelog({
             const plainText = nodeToString(node);
             if (
               // @person
-              (/^@\w+$/.test(plainText) &&
-                /^https?:\/\/github.com\/\w+/.test(node.url)) ||
+              (/^@[\w-]+$/.test(plainText) &&
+                /^https?:\/\/github.com\/[\w-]+/.test(node.url)) ||
               // #123, a/b#123 a#123
-              (/^(\w+(\/\w+)?)?#\d+$/.test(plainText) &&
-                /^https?:\/\/github.com\/\w+\/\w+\/(issues|pull)\/\d+/.test(
+              (/^([\w-]+(\/[\w-]+)?)?#\d+$/.test(plainText) &&
+                /^https?:\/\/github.com\/[\w-]+\/[\w-]+\/(issues|pull)\/\d+/.test(
                   node.url
                 ))
             ) {
