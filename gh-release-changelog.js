@@ -169,6 +169,17 @@ async function ghReleaseChangelog({
                         )}`
                       );
                       fromTag = matchedTag;
+                    } else {
+                      utils.githubActionLogger.warning(
+                        `Inferred fromTag failed from\n${JSON.stringify(
+                          {
+                            tags,
+                            version: tmp.version,
+                          },
+                          null,
+                          2
+                        )}`
+                      );
                     }
                   }
                 }
