@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const cp = require("child_process");
-const ghReleaseChangelog = require("./gh-release-changelog");
+const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require(".");
 const utils = require("./utils");
 
 const exec = (cmd) => {
@@ -23,17 +23,19 @@ async function run() {
       return;
     }
     const fromTag = core.getInput("fromTag");
-    const ignoreTests = core.getInput("ignoreTests");
+    const ignoreTests = (core.getMultilineInput("inputTests") || []).map(
+      (x) => new RegExp(x)
+    );
     const changelogFilename = core.getInput("changelog");
     const label = core.getInput("label");
-    const dryRun = core.getInput("dryRun");
-    const checkStandardVersion = core.getInput("checkStandardVersion");
+    const dryRun = core.getBooleanInput("dryRun");
+    const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
     const initialDepth = core.getInput("initialDepth");
-    const draft = core.getInput("draft");
+    const draft = core.getBooleanInput("draft");
     const checkPkgAvailable =
-      core.getInput("checkPkgAvailable") == null
+      core.getInput("checkPkgAvailable") === ""
         ? true
-        : core.getInput("checkPkgAvailable");
+        : core.getBooleanInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
 
     const tagParsed = utils.parserVersion(tag);
@@ -65,7 +67,7 @@ async function run() {
       repoName,
       dryRun,
     };
-    core.debug("Input Options:\n" + JSON.stringify(options, null, 2));
+    core.info("Input Options:\n" + JSON.stringify(options, null, 2));
     if (options.checkStandardVersion && !utils.isStandardVersion(tag)) {
       core.warning(
         `${tag} is not a standard version, so skip it. you can pass checkStandardVersion=false for skipping the checker`
@@ -73,13 +75,19 @@ async function run() {
       return;
     }
 
+    let result;
     if (!workspaces || !workspaces.length) {
-      const result = await ghReleaseChangelog(options);
-      if (dryRun) {
-        core.info(JSON.stringify(result, null, 2));
-      }
+      core.info("Run in normal repo");
+      result = await ghReleaseChangelog(options);
     } else {
-      // monorepo
+      core.info("Run in monorepo " + workspaces.join(", "));
+      result = await ghReleaseChangelogMonorepo({
+        ...options,
+        workspaces,
+      });
+    }
+    if (dryRun) {
+      core.info(`dryRun result: ` + JSON.stringify(result, null, 2));
     }
 
     core.debug(new Date().toTimeString());

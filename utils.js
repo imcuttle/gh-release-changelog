@@ -2,6 +2,7 @@ const cp = require("child_process");
 const fs = require("fs");
 const nps = require("path");
 const github = require("@actions/github");
+const core = require("@actions/core");
 const { promisify } = require("util");
 const readYaml = require("read-yaml-file");
 const _readJSON = require("read-json-file");
@@ -190,6 +191,13 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   }
 
   const octokit = github.getOctokit(githubToken);
+  if (process.env.GITHUB_ACTIONS) {
+    core.info(
+      `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
+        draft
+      )}\n\n${releaseNote.trim()}`
+    );
+  }
   return await octokit.repos.createRelease({
     owner: repoOwner,
     repo: repoName,
