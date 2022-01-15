@@ -36,3 +36,5 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [1.0.0](https://github.com/imcuttle/rcp/compare/@rcp/util.open@1.0.4...@rcp/util.open@1.0.5) (2021-12-28)
 
 Haha, :smile:
+
+## [1.0.0-0](https://github.com/imcuttle/rcp/compare/@rcp/util.open@1.0.4...@rcp/util.open@1.0.5) (2021-12-28)

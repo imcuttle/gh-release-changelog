@@ -21,10 +21,9 @@ const execSyncStdout = (cmd) => {
 };
 
 const isMatchedTag = (heading, tag) => {
-  const normalizedTag = tag.replace(/^[vV]/, "");
   return (
     utils.isVersionText(heading) &&
-    (heading.startsWith(normalizedTag) || heading.startsWith(tag))
+    utils.parserVersion(heading).version === utils.parserVersion(tag).version
   );
 };
 
@@ -36,6 +35,7 @@ async function ghReleaseChangelog({
   tag = execSyncStdout(`git describe --abbrev=0 --tags HEAD`),
   fromTag,
   dryRun,
+  splitNote,
   githubToken,
   repoOwner,
   repoName,
@@ -97,7 +97,7 @@ async function ghReleaseChangelog({
 
   changelogFilename = nps.resolve(cwd, changelogFilename);
   const changelog = await fs.promises.readFile(changelogFilename, "utf-8");
-
+  const parsed = utils.parserVersion(tag);
   const nodes = [];
   let depth;
   const h = remark().use(() => {
@@ -162,8 +162,14 @@ async function ghReleaseChangelog({
                         x.ref.replace(/^refs\/tags\//, "")
                       );
                       const matchedTag = tags.find((tag) => {
-                        return new RegExp(
-                          `^[vV]?${escapeReg(tmp.version)}$`
+                        return (
+                          parsed.name
+                            ? new RegExp(
+                                `^${escapeReg(parsed.name + "@")}${escapeReg(
+                                  tmp.version
+                                )}$`
+                              )
+                            : new RegExp(`^[vV]?${escapeReg(tmp.version)}$`)
                         ).test(tag);
                       });
                       if (matchedTag) {
@@ -227,23 +233,28 @@ async function ghReleaseChangelog({
     .map((node) => remark().stringify(node))
     .join("\n")
     .trim();
-  if (releaseNote) {
-    let url;
-    if (fromTag) {
-      url = `https://github.com/${repoOwner}/${repoName}/compare/${fromTag}...${tag}`;
-    } else {
-      url = `https://github.com/${repoOwner}/${repoName}/commits/${tag}`;
-    }
-    releaseNote = releaseNote + `\n\n**Full Changelog**: ${url}`;
 
-    if (depth && label) {
-      releaseNote = "#".repeat(depth) + ` ${label}\n\n` + releaseNote;
-    }
+  let url;
+  if (fromTag) {
+    url = `https://github.com/${repoOwner}/${repoName}/compare/${fromTag}...${tag}`;
+  } else {
+    url = `https://github.com/${repoOwner}/${repoName}/commits/${tag}`;
+  }
+
+  const head = depth && label ? "#".repeat(depth) + ` ${label}` : null;
+  const tail = `**Full Changelog**: ${url}`;
+  releaseNote = releaseNote.trim();
+  if (releaseNote) {
+    releaseNote = [head || "", releaseNote, !splitNote ? tail || "" : null]
+      .filter(Boolean)
+      .join("\n\n");
   }
 
   if (dryRun) {
     return {
-      releaseNote: releaseNote.trim(),
+      releaseNote,
+      tail,
+      head,
       changelogFilename,
       githubToken,
       repoOwner,

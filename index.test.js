@@ -1,20 +1,27 @@
 const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require("./");
 const utils = require("./utils");
 const path = require("path");
-const { testCreateRelease } = require("@actions/github");
+const { testRequest, testGetTags } = require("@actions/github");
 
 process.env.GITHUB_TOKEN = "noop";
 
 const fixture = (name) => path.resolve(__dirname, "fixture", name);
 
 jest.mock("@actions/github", () => {
-  const testCreateRelease = jest.fn(() => {});
+  const testRequest = jest.fn(() => {});
+  const testGetTags = jest.fn(() => {});
+
   return {
-    testCreateRelease,
+    testGetTags,
+    testRequest,
     getOctokit: () => {
       return {
         request: (url, params) => {
-          return testCreateRelease(params);
+          testRequest(params);
+          if (url === "GET /repos/{owner}/{repo}/git/matching-refs/{ref}") {
+            return testGetTags(params);
+          }
+          return;
         },
       };
     },
@@ -22,7 +29,8 @@ jest.mock("@actions/github", () => {
 });
 
 beforeEach(() => {
-  testCreateRelease.mockClear();
+  testRequest.mockClear();
+  testGetTags.mockClear();
 });
 
 describe("ghReleaseChangelog", () => {
@@ -35,8 +43,8 @@ describe("ghReleaseChangelog", () => {
       skipEnvGithubRepoInfer: true,
     });
 
-    expect(testCreateRelease).toHaveBeenCalledTimes(2);
-    expect(testCreateRelease.mock.calls).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(2);
+    expect(testRequest.mock.calls).toMatchSnapshot();
   });
   test("valid-long v1.0.2", async () => {
     await ghReleaseChangelog({
@@ -50,8 +58,8 @@ describe("ghReleaseChangelog", () => {
       checkPkgAvailable: true,
     });
 
-    expect(testCreateRelease.mock.calls).toMatchSnapshot();
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
+    expect(testRequest.mock.calls).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(1);
   });
 
   test("valid-long v1.0.2-beta.3", async () => {
@@ -66,8 +74,8 @@ describe("ghReleaseChangelog", () => {
       checkPkgAvailable: true,
     });
 
-    expect(testCreateRelease.mock.calls).toMatchSnapshot();
-    expect(testCreateRelease).toHaveBeenCalledTimes(2);
+    expect(testRequest.mock.calls).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(2);
   });
 
   test("lerna-sub not-found", async () => {
@@ -78,7 +86,7 @@ describe("ghReleaseChangelog", () => {
       label: "@rcp/abc",
       skipEnvGithubRepoInfer: true,
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(0);
+    expect(testRequest).toHaveBeenCalledTimes(0);
   });
 
   test("lerna-sub version bump only", async () => {
@@ -89,7 +97,7 @@ describe("ghReleaseChangelog", () => {
       label: "@rcp/abc",
       skipEnvGithubRepoInfer: true,
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(0);
+    expect(testRequest).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -101,19 +109,30 @@ describe("ghReleaseChangelogMonorepo", () => {
       repoName: "a",
       repoOwner: "o",
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
-    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(1);
+    expect(testRequest.mock.calls[0]).toMatchSnapshot();
   });
 
   it("pnpm", async function () {
+    testGetTags.mockReturnValueOnce({
+      data: [
+        {
+          ref: "refs/tags/a@1.0.0",
+        },
+        {
+          ref: "refs/tags/a@1.0.0-0",
+        },
+      ],
+    });
     await ghReleaseChangelogMonorepo({
       cwd: fixture("monorepo/pnpm"),
       repoName: "a",
       repoOwner: "o",
-      tag: "1.0.0",
+      tag: "a@1.0.0",
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
-    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+
+    expect(testRequest).toHaveBeenCalledTimes(2);
+    expect(testRequest.mock.calls).toMatchSnapshot();
   });
 
   it("workspaces", async function () {
@@ -123,8 +142,8 @@ describe("ghReleaseChangelogMonorepo", () => {
       repoOwner: "o",
       tag: "1.0.0",
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
-    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(1);
+    expect(testRequest.mock.calls[0]).toMatchSnapshot();
   });
 
   it("same-version-root-changelog", async function () {
@@ -134,8 +153,8 @@ describe("ghReleaseChangelogMonorepo", () => {
       repoName: "a",
       repoOwner: "o",
     });
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
-    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+    expect(testRequest).toHaveBeenCalledTimes(1);
+    expect(testRequest.mock.calls[0]).toMatchSnapshot();
   });
 });
 

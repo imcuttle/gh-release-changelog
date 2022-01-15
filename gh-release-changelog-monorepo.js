@@ -50,6 +50,7 @@ module.exports = async function ghReleaseChangelogMonorepo({
           tag,
           ...releaseConfig,
           cwd: pkg.location,
+          splitNote: true,
           changelogFilename:
             !releaseConfig.changelogFilename ||
             !path.isAbsolute(releaseConfig.changelogFilename)
@@ -60,12 +61,15 @@ module.exports = async function ghReleaseChangelogMonorepo({
         })),
         pkg,
       },
-      ["changelogFilename", "releaseNote"]
+      ["changelogFilename", "releaseNote", "head", "tail"]
     );
   };
   if (parsed.name) {
     // independent
     const pkg = packages.find((pkg) => pkg.name === parsed.name);
+    if (!pkg) {
+      throw new Error(`tag ${tag} does not match pkg`);
+    }
     releaseNotes.push(await releasePkg(pkg));
   } else {
     const promises = packages.map(async (pkg) => releasePkg(pkg));
@@ -112,7 +116,11 @@ module.exports = async function ghReleaseChangelogMonorepo({
       repoOwner,
       repoName,
       tag,
-      releaseNote: releaseNotes.map((r) => r.releaseNote).join("\n\n"),
+      releaseNote: releaseNotes
+        .map((r) => r.releaseNote)
+        .concat(releaseNotes[0].tail)
+        .filter(Boolean)
+        .join("\n\n"),
     });
   }
 };

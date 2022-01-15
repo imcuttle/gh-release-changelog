@@ -99,8 +99,6 @@ Array [
 
 Haha, :smile:
 
-**Full Changelog**: https://github.com/o/a/commits/1.0.0
-
 #### b
 
 Haha, :smile:
@@ -120,28 +118,31 @@ Haha, :smile:
 
 exports[`ghReleaseChangelogMonorepo pnpm 1`] = `
 Array [
-  Object {
-    "accept": undefined,
-    "body": "#### a
+  Array [
+    Object {
+      "owner": "o",
+      "ref": "tags",
+      "repo": "a",
+    },
+  ],
+  Array [
+    Object {
+      "accept": undefined,
+      "body": "#### a
 
 Haha, :smile:
 
-**Full Changelog**: https://github.com/o/a/commits/1.0.0
-
-#### b
-
-Haha, :smile:
-
-**Full Changelog**: https://github.com/o/a/commits/1.0.0",
-    "discussion_category_name": undefined,
-    "draft": undefined,
-    "generate_release_notes": undefined,
-    "owner": "o",
-    "prerelease": undefined,
-    "repo": "a",
-    "tag_name": "1.0.0",
-    "target_commitish": undefined,
-  },
+**Full Changelog**: https://github.com/o/a/compare/a@1.0.0-0...a@1.0.0",
+      "discussion_category_name": undefined,
+      "draft": undefined,
+      "generate_release_notes": undefined,
+      "owner": "o",
+      "prerelease": undefined,
+      "repo": "a",
+      "tag_name": "a@1.0.0",
+      "target_commitish": undefined,
+    },
+  ],
 ]
 `;
 
@@ -171,8 +172,6 @@ Array [
     "body": "#### a
 
 Haha, :smile:
-
-**Full Changelog**: https://github.com/o/a/commits/1.0.0
 
 #### b
 
