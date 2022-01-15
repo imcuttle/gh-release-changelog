@@ -28,10 +28,11 @@ module.exports = async function ghReleaseChangelogMonorepo({
         new Package(packageJson, path.dirname(packageConfigPath), cwd)
     );
 
-  const packages = await makeFileFinder(cwd, workspaces)(
+  let packages = await makeFileFinder(cwd, workspaces)(
     "package.json",
     (filePaths) => pMap(filePaths, mapper, { concurrency: 50 })
   );
+  packages = packages.filter((pkg) => !pkg.private);
 
   if (!tag) {
     throw new Error(`tag is required`);
