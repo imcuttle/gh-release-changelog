@@ -157,12 +157,17 @@ async function ghReleaseChangelog({
                     const matchedTag = tags.find((tag) => {
                       new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
                     });
-                    console.log({
-                      tags,
-                      "tmp.version": tmp.version,
-                      matchedTag,
-                    });
                     if (matchedTag) {
+                      utils.githubActionLogger.info(
+                        `Inferred fromTag "${matchedTag}" from\n${JSON.stringify(
+                          {
+                            tags,
+                            version: tmp.version,
+                          },
+                          null,
+                          2
+                        )}`
+                      );
                       fromTag = matchedTag;
                     }
                   }

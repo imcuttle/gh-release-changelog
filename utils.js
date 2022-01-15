@@ -224,11 +224,13 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
       data
     )}\n\n${releaseNote.trim()}`
   );
-  return await octokit.request("POST /repos/{owner}/{repo}/releases", {
+  const res = await octokit.request("POST /repos/{owner}/{repo}/releases", {
     owner: repoOwner,
     repo: repoName,
     tag_name: tag,
     body: releaseNote.trim(),
     ...data,
   });
+  githubActionLogger.info(`Created!`);
+  return res;
 });
