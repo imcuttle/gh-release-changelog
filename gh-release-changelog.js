@@ -144,8 +144,8 @@ async function ghReleaseChangelog({
                           "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
                           {
                             ref: "tags",
-                            owner: "imcuttle",
-                            repo: "gh-release-changelog",
+                            owner: repoOwner,
+                            repo: repoName,
                           }
                         )
                       ).data || [];
