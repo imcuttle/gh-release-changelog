@@ -270,14 +270,14 @@ async function ghReleaseChangelog({
                     const octokit = github.getOctokit(githubToken);
                     const data =
                       (
-                        await octokit.request(
+                        (await octokit.request(
                           "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
                           {
                             ref: "tags",
                             owner: repoOwner,
                             repo: repoName,
                           }
-                        )
+                        )) || {}
                       ).data || [];
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
