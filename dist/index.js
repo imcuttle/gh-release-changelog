@@ -48951,7 +48951,9 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   prerelease,
   discussion_category_name,
   generate_release_notes,
+  target_commitish,
   tag,
+  accept,
   githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
   releaseNote,
 }) {
@@ -48986,6 +48988,8 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
     prerelease,
     discussion_category_name,
     generate_release_notes,
+    target_commitish,
+    accept,
   });
 });
 

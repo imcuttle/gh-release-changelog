@@ -2,7 +2,7 @@ const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require("./");
 const path = require("path");
 const { testCreateRelease } = require("@actions/github");
 
-process.env.GITHUB_TOKEN = 'noop'
+process.env.GITHUB_TOKEN = "noop";
 
 const fixture = (name) => path.resolve(__dirname, "fixture", name);
 
@@ -12,8 +12,8 @@ jest.mock("@actions/github", () => {
     testCreateRelease,
     getOctokit: () => {
       return {
-        repos: {
-          createRelease: testCreateRelease,
+        request: (url, params) => {
+          return testCreateRelease(params);
         },
       };
     },
@@ -99,8 +99,8 @@ describe("ghReleaseChangelogMonorepo", () => {
     await ghReleaseChangelogMonorepo({
       cwd: fixture("monorepo/same-version-root-changelog"),
       tag: "1.0.0",
-      repoName: 'a',
-      repoOwner: 'o',
+      repoName: "a",
+      repoOwner: "o",
     });
     expect(testCreateRelease).toHaveBeenCalledTimes(1);
     expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
