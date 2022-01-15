@@ -171,6 +171,12 @@ const githubActionLogger = (exports.githubActionLogger = {
   info: (message) => {
     IS_GITHUB_ACTIONS && core.info(message)
   },
+  warning: (message) => {
+    IS_GITHUB_ACTIONS && core.warning(message)
+  },
+  error: (message) => {
+    IS_GITHUB_ACTIONS && core.error(message)
+  },
 });
 
 const releaseGitHub = (exports.releaseGitHub = async function ({

@@ -97,6 +97,7 @@ module.exports = async function ghReleaseChangelogMonorepo({
     };
   } else {
     if (!releaseNotes.length) {
+      utils.githubActionLogger.warning(`Fallback to using root changelog.`);
       return release({
         ...releaseConfig,
         cwd,
@@ -313,7 +314,7 @@ async function ghReleaseChangelog({
     };
   } else {
     if (!releaseNote.trim()) {
-      utils.githubActionLogger.info(`releaseNote is empty`);
+      utils.githubActionLogger.warning(`releaseNote is empty`);
       return;
     }
     return utils.releaseGitHub({
@@ -48932,6 +48933,12 @@ const IS_GITHUB_ACTIONS = !!process.env.GITHUB_ACTIONS
 const githubActionLogger = (exports.githubActionLogger = {
   info: (message) => {
     IS_GITHUB_ACTIONS && core.info(message)
+  },
+  warning: (message) => {
+    IS_GITHUB_ACTIONS && core.warning(message)
+  },
+  error: (message) => {
+    IS_GITHUB_ACTIONS && core.error(message)
   },
 });
 

@@ -91,6 +91,7 @@ module.exports = async function ghReleaseChangelogMonorepo({
     };
   } else {
     if (!releaseNotes.length) {
+      utils.githubActionLogger.warning(`Fallback to using root changelog.`);
       return release({
         ...releaseConfig,
         cwd,
