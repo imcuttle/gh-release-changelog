@@ -48922,10 +48922,10 @@ const getWorkspaceConfig = (exports.getWorkspaceConfig = async function (
 });
 
 const versionRegs = [
-  /^(\d+\.\d+(?:\.\d+)?)/,
-  /^[vV](\d+\.\d+(?:\.\d+)?)/,
-  /^(\w+)@(\d+\.\d+(?:\.\d+)?)/,
-  /^(@\w+)@(\d+\.\d+(?:\.\d+)?)/,
+  /^(\d+\.\d+(?:\.\d+)?\S*)/,
+  /^[vV](\d+\.\d+(?:\.\d+)?\S*)/,
+  /^(\w+)@(\d+\.\d+(?:\.\d+)?\S*)/,
+  /^(@\w+\/\w+)@(\d+\.\d+(?:\.\d+)?\S*)/,
 ];
 
 const isVersionText = (exports.isVersionText = (text) => {

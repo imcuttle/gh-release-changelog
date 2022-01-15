@@ -1,4 +1,5 @@
 const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require("./");
+const utils = require("./utils");
 const path = require("path");
 const { testCreateRelease } = require("@actions/github");
 
@@ -104,5 +105,30 @@ describe("ghReleaseChangelogMonorepo", () => {
     });
     expect(testCreateRelease).toHaveBeenCalledTimes(1);
     expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+  });
+});
+
+describe("utils", () => {
+  it("parserVersion", function () {
+    expect(utils.parserVersion("v1.0.2-beta.2")).toMatchInlineSnapshot(`
+      Object {
+        "version": "1.0.2-beta.2",
+      }
+    `);
+    expect(utils.parserVersion("@rcp/asdsa@1.0.2-beta.2"))
+      .toMatchInlineSnapshot(`
+      Object {
+        "name": "@rcp/asdsa",
+        "version": "1.0.2-beta.2",
+      }
+    `);
+
+    expect(utils.parserVersion("@rcp/asdsa@1.0.2-beta.2 123"))
+      .toMatchInlineSnapshot(`
+      Object {
+        "name": "@rcp/asdsa",
+        "version": "1.0.2-beta.2",
+      }
+    `);
   });
 });
