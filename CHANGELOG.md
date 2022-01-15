@@ -1,3 +1,12 @@
+## [1.0.5](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.4...v1.0.5) (2022-01-15)
+
+
+### Bug Fixes
+
+* infer fromTag independent version for monorepo ([c52555d](https://github.com/imcuttle/gh-release-changelog/commit/c52555d0d99ce6cc5b90cadf5abf4010234065f8))
+
+
+
 ## [1.0.4](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.3...v1.0.4) (2022-01-15)
 
 
