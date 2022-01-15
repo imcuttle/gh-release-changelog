@@ -269,14 +269,16 @@ async function ghReleaseChangelog({
                   if (tmp && tmp.version) {
                     const octokit = github.getOctokit(githubToken);
                     const data =
-                      (await octokit.request(
-                        "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
-                        {
-                          ref: "tags",
-                          owner: repoOwner,
-                          repo: repoName,
-                        }
-                      )) || [];
+                      (
+                        await octokit.request(
+                          "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
+                          {
+                            ref: "tags",
+                            owner: "imcuttle",
+                            repo: "gh-release-changelog",
+                          }
+                        )
+                      ).data || [];
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
                     );
