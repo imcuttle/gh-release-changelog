@@ -1,6 +1,6 @@
 # gh-release-changelog
 
-<a href="https://github.com/imcuttle/gh-release-changelog/actions"><img alt="javscript-action status" src="https://github.com/imcuttle/gh-release-changelog/workflows/ci/badge.svg"></a>
+<a href="https://github.com/imcuttle/gh-release-changelog/actions"><img alt="javscript-action status" src="https://github.com/imcuttle/gh-release-changelog/workflows/CI/badge.svg"></a>
 
 Create GitHub Release from changelog and tag push.
 
