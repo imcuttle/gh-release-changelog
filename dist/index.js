@@ -313,6 +313,7 @@ async function ghReleaseChangelog({
     };
   } else {
     if (!releaseNote.trim()) {
+      utils.githubActionLogger.info(`releaseNote is empty`);
       return;
     }
     return utils.releaseGitHub({
@@ -48927,6 +48928,13 @@ const inferRepoInfo = (exports.inferRepoInfo = async (
   return [repoOwner, repoName];
 });
 
+const IS_GITHUB_ACTIONS = !!process.env.GITHUB_ACTIONS
+const githubActionLogger = (exports.githubActionLogger = {
+  info: (message) => {
+    IS_GITHUB_ACTIONS && core.info(message)
+  },
+});
+
 const releaseGitHub = (exports.releaseGitHub = async function ({
   repoOwner,
   repoName,
@@ -48952,13 +48960,11 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   }
 
   const octokit = github.getOctokit(githubToken);
-  if (process.env.GITHUB_ACTIONS) {
-    core.info(
-      `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
-        draft
-      )}\n\n${releaseNote.trim()}`
-    );
-  }
+  githubActionLogger.info(
+    `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
+      draft
+    )}\n\n${releaseNote.trim()}`
+  );
   return await octokit.repos.createRelease({
     owner: repoOwner,
     repo: repoName,
@@ -49232,7 +49238,7 @@ async function run() {
     const label = core.getInput("label");
     const dryRun = core.getBooleanInput("dryRun");
     const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
-    const initialDepth = core.getInput("initialDepth");
+    const initialDepth = Number(core.getInput("initialDepth"));
     const draft = core.getBooleanInput("draft");
     const checkPkgAvailable = core.getBooleanInput("checkPkgAvailable");
     let [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
@@ -49240,7 +49246,6 @@ async function run() {
       skipEnvGithubRepoInfer: false,
     });
 
-    core.info(JSON.stringify(process.env, null, 2))
     const tagParsed = utils.parserVersion(tag);
     if (!tagParsed) {
       core.warning(`tag "${tag}" is ignored.`);

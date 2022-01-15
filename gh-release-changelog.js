@@ -184,6 +184,7 @@ async function ghReleaseChangelog({
     };
   } else {
     if (!releaseNote.trim()) {
+      utils.githubActionLogger.info(`releaseNote is empty`);
       return;
     }
     return utils.releaseGitHub({

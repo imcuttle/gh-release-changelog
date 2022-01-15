@@ -166,6 +166,13 @@ const inferRepoInfo = (exports.inferRepoInfo = async (
   return [repoOwner, repoName];
 });
 
+const IS_GITHUB_ACTIONS = !!process.env.GITHUB_ACTIONS
+const githubActionLogger = (exports.githubActionLogger = {
+  info: (message) => {
+    IS_GITHUB_ACTIONS && core.info(message)
+  },
+});
+
 const releaseGitHub = (exports.releaseGitHub = async function ({
   repoOwner,
   repoName,
@@ -191,13 +198,11 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   }
 
   const octokit = github.getOctokit(githubToken);
-  if (process.env.GITHUB_ACTIONS) {
-    core.info(
-      `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
-        draft
-      )}\n\n${releaseNote.trim()}`
-    );
-  }
+  githubActionLogger.info(
+    `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
+      draft
+    )}\n\n${releaseNote.trim()}`
+  );
   return await octokit.repos.createRelease({
     owner: repoOwner,
     repo: repoName,

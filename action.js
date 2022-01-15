@@ -30,7 +30,7 @@ async function run() {
     const label = core.getInput("label");
     const dryRun = core.getBooleanInput("dryRun");
     const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
-    const initialDepth = core.getInput("initialDepth");
+    const initialDepth = Number(core.getInput("initialDepth"));
     const draft = core.getBooleanInput("draft");
     const checkPkgAvailable = core.getBooleanInput("checkPkgAvailable");
     let [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
@@ -38,7 +38,6 @@ async function run() {
       skipEnvGithubRepoInfer: false,
     });
 
-    core.info(JSON.stringify(process.env, null, 2))
     const tagParsed = utils.parserVersion(tag);
     if (!tagParsed) {
       core.warning(`tag "${tag}" is ignored.`);
