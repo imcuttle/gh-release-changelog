@@ -3,7 +3,7 @@ const cp = require("child_process");
 const nps = require("path");
 const fs = require("fs");
 const globby = require("globby");
-const { sync: visitTree } = require("@moyuyc/visit-tree");
+const visitTree = require("@moyuyc/visit-tree");
 const remark = require("remark");
 const { promisify } = require("util");
 const nodeToString = require("mdast-util-to-string");
@@ -20,7 +20,7 @@ const execSyncStdout = (cmd) => {
 };
 
 const isMatchedTag = (heading, tag) => {
-  const normalizedTag = tag.replace(/^v/, "");
+  const normalizedTag = tag.replace(/^[vV]/, "");
   return (
     utils.isVersionText(heading) &&
     (heading.startsWith(normalizedTag) || heading.startsWith(tag))
@@ -99,8 +99,8 @@ async function ghReleaseChangelog({
   const nodes = [];
   let depth;
   const h = remark().use(() => {
-    return (gnode) => {
-      visitTree(gnode, (node, ctx) => {
+    return async (gnode) => {
+      await visitTree(gnode, async (node, ctx) => {
         if (node.type === "heading") {
           const heading = nodeToString(node).trim();
           if (isMatchedTag(heading, tag)) {
@@ -120,13 +120,6 @@ async function ghReleaseChangelog({
                 !utils.isVersionText(text) ||
                 (fromTag && !isMatchedTag(text, fromTag))
               ) {
-                if (!fromTag && nextNode.type === "heading") {
-                  const tmp = utils.parserVersion(text);
-                  if (tmp && tmp.version) {
-                    fromTag = tmp.version;
-                  }
-                }
-
                 if (nextNode.type === "heading") {
                   if (nextNode.depth > 1) {
                     depth = Math.min(
@@ -141,6 +134,30 @@ async function ghReleaseChangelog({
                 }
                 nodes.push(nextNode);
               } else {
+                if (!fromTag && nextNode.type === "heading") {
+                  const tmp = utils.parserVersion(text);
+                  if (tmp && tmp.version) {
+                    const octokit = github.getOctokit(githubToken);
+                    const data =
+                      (await octokit.request(
+                        "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
+                        {
+                          ref: "tags",
+                          owner: repoOwner,
+                          repo: repoName,
+                        }
+                      )) || [];
+                    const tags = data.map((x) =>
+                      x.ref.replace(/^refs\/tags\//, "")
+                    );
+                    const matchedTag = tags.find((tag) =>
+                      isMatchedTag(tmp.version, tag)
+                    );
+                    if (matchedTag) {
+                      fromTag = matchedTag;
+                    }
+                  }
+                }
                 break;
               }
             }

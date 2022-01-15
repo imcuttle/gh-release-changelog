@@ -220,7 +220,7 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
     accept,
   };
   githubActionLogger.info(
-    `Creating github release: ${repoOwner}/${repoName} ${tag} ${JSON.stringify(
+    `Creating github release: ${repoOwner}/${repoName} ${tag}\n${JSON.stringify(
       data
     )}\n\n${releaseNote.trim()}`
   );

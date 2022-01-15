@@ -2,9 +2,17 @@
 
 exports[`ghReleaseChangelog valid 1`] = `
 Array [
-  Object {
-    "accept": undefined,
-    "body": "## @rcp/abc
+  Array [
+    Object {
+      "owner": "imcuttle",
+      "ref": "tags",
+      "repo": "rcp",
+    },
+  ],
+  Array [
+    Object {
+      "accept": undefined,
+      "body": "## @rcp/abc
 
 ### Bug Fixes
 
@@ -34,16 +42,17 @@ Array [
 *   use es6 instead of es5
 *   remove global option
 
-Full Changelog: [v1.0.0](https://github.com/imcuttle/rcp/commits/v1.0.0)",
-    "discussion_category_name": undefined,
-    "draft": false,
-    "generate_release_notes": undefined,
-    "owner": "imcuttle",
-    "prerelease": undefined,
-    "repo": "rcp",
-    "tag_name": "v1.0.0",
-    "target_commitish": undefined,
-  },
+Full Changelog: [2.0.0](https://github.com/imcuttle/rcp/commits/2.0.0)",
+      "discussion_category_name": undefined,
+      "draft": false,
+      "generate_release_notes": undefined,
+      "owner": "imcuttle",
+      "prerelease": undefined,
+      "repo": "rcp",
+      "tag_name": "2.0.0",
+      "target_commitish": undefined,
+    },
+  ],
 ]
 `;
 

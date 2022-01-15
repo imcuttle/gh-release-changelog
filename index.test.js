@@ -26,16 +26,16 @@ beforeEach(() => {
 
 describe("ghReleaseChangelog", () => {
   test("valid", async () => {
-    const data = await ghReleaseChangelog({
+    await ghReleaseChangelog({
       cwd: fixture("valid"),
-      tag: "v1.0.0",
+      tag: "2.0.0",
       githubToken: "noop",
       label: "@rcp/abc",
       skipEnvGithubRepoInfer: true,
     });
 
-    expect(testCreateRelease).toHaveBeenCalledTimes(1);
-    expect(testCreateRelease.mock.calls[0]).toMatchSnapshot();
+    expect(testCreateRelease).toHaveBeenCalledTimes(2);
+    expect(testCreateRelease.mock.calls).toMatchSnapshot();
   });
 
   test("lerna-sub not-found", async () => {
