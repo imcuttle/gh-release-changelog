@@ -3,11 +3,13 @@ const cp = require("child_process");
 const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require(".");
 const utils = require("./utils");
 
-const exec = (cmd) => {
+const exec = (cmd, silent = true) => {
   try {
     return cp.execSync(cmd).toString().trim();
   } catch (err) {
-    core.warning(err);
+    if (!silent) {
+      core.warning(err);
+    }
   }
 };
 

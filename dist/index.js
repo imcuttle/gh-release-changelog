@@ -295,14 +295,7 @@ async function ghReleaseChangelog({
                       });
                       if (matchedTag) {
                         utils.githubActionLogger.info(
-                          `Inferred fromTag "${matchedTag}" from\n${JSON.stringify(
-                            {
-                              tags,
-                              version: tmp.version,
-                            },
-                            null,
-                            2
-                          )}`
+                          `Inferred fromTag "${matchedTag}" from ${tmp.version}}`
                         );
                         fromTag = matchedTag;
                       } else {
@@ -49331,11 +49324,13 @@ const cp = __nccwpck_require__(3129);
 const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = __nccwpck_require__(2932);
 const utils = __nccwpck_require__(1252);
 
-const exec = (cmd) => {
+const exec = (cmd, silent = true) => {
   try {
     return cp.execSync(cmd).toString().trim();
   } catch (err) {
-    core.warning(err);
+    if (!silent) {
+      core.warning(err);
+    }
   }
 };
 

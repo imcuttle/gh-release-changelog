@@ -165,14 +165,7 @@ async function ghReleaseChangelog({
                       });
                       if (matchedTag) {
                         utils.githubActionLogger.info(
-                          `Inferred fromTag "${matchedTag}" from\n${JSON.stringify(
-                            {
-                              tags,
-                              version: tmp.version,
-                            },
-                            null,
-                            2
-                          )}`
+                          `Inferred fromTag "${matchedTag}" from ${tmp.version}}`
                         );
                         fromTag = matchedTag;
                       } else {
