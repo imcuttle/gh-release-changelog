@@ -221,7 +221,9 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
     body: releaseNote.trim(),
     draft,
     prerelease,
-    discussion_category_name,
+    discussion_category_name: !!discussion_category_name
+      ? discussion_category_name
+      : undefined,
     generate_release_notes,
     target_commitish,
     accept,

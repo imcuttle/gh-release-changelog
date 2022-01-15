@@ -7,7 +7,7 @@ const exec = (cmd) => {
   try {
     return cp.execSync(cmd).toString().trim();
   } catch (err) {
-    core.error(err);
+    core.warning(err);
   }
 };
 
