@@ -101,96 +101,127 @@ async function ghReleaseChangelog({
   let depth;
   const h = remark().use(() => {
     return async (gnode) => {
-      await visitTree(gnode, async (node, ctx) => {
-        if (node.type === "heading") {
-          const heading = nodeToString(node).trim();
-          if (isMatchedTag(heading, tag)) {
-            // depth = initialDepth
-            // add next Siblings which is not version heading
-            let index = ctx.index + 1;
-            while (true) {
-              const nextNode = ctx.parent.children[index];
-              index++;
-              if (!nextNode) {
-                break;
-              }
-
-              const text = nodeToString(nextNode);
-              if (
-                nextNode.type !== "heading" ||
-                !utils.isVersionText(text) ||
-                (fromTag && !isMatchedTag(text, fromTag))
-              ) {
-                if (nextNode.type === "heading") {
-                  if (nextNode.depth > 1) {
-                    depth = Math.min(
-                      depth || Number.MAX_VALUE,
-                      nextNode.depth - 1
-                    );
-                  }
+      let breakNode;
+      await visitTree(
+        gnode,
+        async (node, ctx) => {
+          if (node.type === "heading") {
+            const heading = nodeToString(node).trim();
+            if (isMatchedTag(heading, tag)) {
+              // depth = initialDepth
+              // add next Siblings which is not version heading
+              let index = ctx.index + 1;
+              let nextNode;
+              while (true) {
+                nextNode = ctx.parent.children[index];
+                index++;
+                if (!nextNode) {
+                  break;
                 }
 
-                if (ignoreTests.some((rule) => rule.test(text))) {
-                  continue;
-                }
-                nodes.push(nextNode);
-              } else {
-                if (!fromTag && nextNode.type === "heading") {
-                  const tmp = utils.parserVersion(text);
-                  if (tmp && tmp.version) {
-                    const octokit = github.getOctokit(githubToken);
-                    const data =
-                      (
-                        (await octokit.request(
-                          "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
-                          {
-                            ref: "tags",
-                            owner: repoOwner,
-                            repo: repoName,
-                          }
-                        )) || {}
-                      ).data || [];
-                    data.reverse();
-                    const tags = data.map((x) =>
-                      x.ref.replace(/^refs\/tags\//, "")
-                    );
-                    const matchedTag = tags.find((tag) => {
-                      return new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
-                    });
-                    if (matchedTag) {
-                      utils.githubActionLogger.info(
-                        `Inferred fromTag "${matchedTag}" from\n${JSON.stringify(
-                          {
-                            tags,
-                            version: tmp.version,
-                          },
-                          null,
-                          2
-                        )}`
-                      );
-                      fromTag = matchedTag;
-                    } else {
-                      utils.githubActionLogger.warning(
-                        `Inferred fromTag failed from\n${JSON.stringify(
-                          {
-                            tags,
-                            version: tmp.version,
-                          },
-                          null,
-                          2
-                        )}`
+                const text = nodeToString(nextNode);
+                if (
+                  nextNode.type !== "heading" ||
+                  !utils.isVersionText(text) ||
+                  (fromTag && !isMatchedTag(text, fromTag))
+                ) {
+                  if (nextNode.type === "heading") {
+                    if (nextNode.depth > 1) {
+                      depth = Math.min(
+                        depth || Number.MAX_VALUE,
+                        nextNode.depth - 1
                       );
                     }
                   }
+
+                  if (ignoreTests.some((rule) => rule.test(text))) {
+                    continue;
+                  }
+                  nodes.push(nextNode);
+                } else {
+                  if (!fromTag && nextNode.type === "heading") {
+                    const tmp = utils.parserVersion(text);
+                    if (tmp && tmp.version) {
+                      const octokit = github.getOctokit(githubToken);
+                      const data =
+                        (
+                          (await octokit.request(
+                            "GET /repos/{owner}/{repo}/git/matching-refs/{ref}",
+                            {
+                              ref: "tags",
+                              owner: repoOwner,
+                              repo: repoName,
+                            }
+                          )) || {}
+                        ).data || [];
+                      data.reverse();
+                      const tags = data.map((x) =>
+                        x.ref.replace(/^refs\/tags\//, "")
+                      );
+                      const matchedTag = tags.find((tag) => {
+                        return new RegExp(
+                          `^[vV]?${escapeReg(tmp.version)}$`
+                        ).test(tag);
+                      });
+                      if (matchedTag) {
+                        utils.githubActionLogger.info(
+                          `Inferred fromTag "${matchedTag}" from\n${JSON.stringify(
+                            {
+                              tags,
+                              version: tmp.version,
+                            },
+                            null,
+                            2
+                          )}`
+                        );
+                        fromTag = matchedTag;
+                      } else {
+                        utils.githubActionLogger.warning(
+                          `Inferred fromTag failed from\n${JSON.stringify(
+                            {
+                              tags,
+                              version: tmp.version,
+                            },
+                            null,
+                            2
+                          )}`
+                        );
+                      }
+                    }
+                  }
+                  break;
                 }
-                break;
               }
+              depth = depth || initialDepth;
+
+              breakNode = nextNode || node;
             }
-            depth = depth || initialDepth;
+          }
+        },
+        async (node, ctx) => {
+          if (node.type === "link") {
+            const plainText = nodeToString(node);
+            if (
+              // @person
+              (/^@\w+$/.test(plainText) &&
+                /^https?:\/\/github.com\/\w+/.test(node.url)) ||
+              // #123, a/b#123 a#123
+              (/^(\w+(\/\w+)?)?#\d+$/.test(plainText) &&
+                /^https?:\/\/github.com\/\w+\/\w+\/(issues|pull)\/\d+/.test(
+                  node.url
+                ))
+            ) {
+              ctx.replace({
+                type: "text",
+                value: plainText,
+              });
+            }
+          }
+          if (breakNode && node === breakNode) {
             ctx.break();
           }
         }
-      });
+      );
     };
   });
   await h.process(changelog);
