@@ -48974,16 +48974,7 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
   }
 
   const octokit = github.getOctokit(githubToken);
-  githubActionLogger.info(
-    `Creating github release: ${repoOwner}/${repoName} tag=${tag} draft=${Boolean(
-      draft
-    )}\n\n${releaseNote.trim()}`
-  );
-  return await octokit.request("POST /repos/{owner}/{repo}/releases", {
-    owner: repoOwner,
-    repo: repoName,
-    tag_name: tag,
-    body: releaseNote.trim(),
+  const data = {
     draft,
     prerelease,
     discussion_category_name: !!discussion_category_name
@@ -48992,6 +48983,18 @@ const releaseGitHub = (exports.releaseGitHub = async function ({
     generate_release_notes,
     target_commitish,
     accept,
+  };
+  githubActionLogger.info(
+    `Creating github release: ${repoOwner}/${repoName} ${tag} ${JSON.stringify(
+      data
+    )}\n\n${releaseNote.trim()}`
+  );
+  return await octokit.request("POST /repos/{owner}/{repo}/releases", {
+    owner: repoOwner,
+    repo: repoName,
+    tag_name: tag,
+    body: releaseNote.trim(),
+    ...data,
   });
 });
 
