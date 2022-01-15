@@ -49234,10 +49234,7 @@ async function run() {
     const checkStandardVersion = core.getBooleanInput("checkStandardVersion");
     const initialDepth = core.getInput("initialDepth");
     const draft = core.getBooleanInput("draft");
-    const checkPkgAvailable =
-      core.getInput("checkPkgAvailable") === ""
-        ? true
-        : core.getBooleanInput("checkPkgAvailable");
+    const checkPkgAvailable = core.getBooleanInput("checkPkgAvailable");
     const [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
 
     const tagParsed = utils.parserVersion(tag);

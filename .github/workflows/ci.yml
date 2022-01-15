@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - "**"
-    tags:
-      - "**"
+#    tags:
+#      - "**"
 
 jobs:
   test:
@@ -27,6 +27,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
+          tag: 'v1.0.2-beta.0'
           token: ${{ secrets.GITHUB_TOKEN }}
+          checkStandardVersion: false
         env:
           ACTIONS_STEP_DEBUG: true

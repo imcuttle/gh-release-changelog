@@ -21,21 +21,25 @@ inputs:
     required: false
   checkPkgAvailable:
     description: "checkPkgAvailable"
+    default: 'true'
     required: false
   checkStandardVersion:
     description: "Enable check standard version (eg. 1.0.1, 1.2.3-0 is not standard)"
+    default: 'true'
     required: false
   repoUrl:
     description: "The repo url for release (eg. 'imcuttle/gh-release-changelog')"
     required: false
   draft:
     description: "The release is draft"
+    default: 'false'
     required: false
   initialDepth:
     description: "Label heading default depth"
     required: false
   dryRun: # id of input
     description: "Just dry run for log"
+    default: 'false'
     required: false
 #outputs:
 #  time: # output will be available to future steps
