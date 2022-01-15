@@ -8,7 +8,7 @@ Create GitHub Release from changelog and tag push.
 
 ### Monorepo
 
-Supports lerna independent and fixed version mode.
+Supports lerna independent (eg. `foo@1.0.0`) and fixed (eg. `v1.0.0`) version mode.
 
 ```bash
 root/
