@@ -1,3 +1,17 @@
+## [1.0.2-beta.3](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2-beta.2...v1.0.2-beta.3) (2022-01-15)
+
+
+### Bug Fixes
+
+* some thing 1.0.2-beta.3 [#1](https://github.com/imcuttle/gh-release-changelog/issues/1) [@imcuttle](https://github.com/imcuttle) ([a8bc65c](https://github.com/imcuttle/gh-release-changelog/commit/a8bc65c21d65e0b6a6c3f90bced3647363650112))
+
+
+### BREAKING CHANGES
+
+* some changes...
+
+
+
 ## [1.0.2-beta.2](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2-beta.1...v1.0.2-beta.2) (2022-01-15)
 
 
