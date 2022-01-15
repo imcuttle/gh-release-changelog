@@ -149,6 +149,7 @@ async function ghReleaseChangelog({
                           }
                         )) || {}
                       ).data || [];
+                    console.log('data', data)
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
                     );
@@ -183,7 +184,7 @@ async function ghReleaseChangelog({
     } else {
       url = `https://github.com/${repoOwner}/${repoName}/commits/${tag}`;
     }
-    releaseNote = releaseNote + `\n\nFull Changelog: [${tag}](${url})`;
+    releaseNote = releaseNote + `\n\n**Full Changelog**: [${tag}](${url})`;
 
     if (depth && label) {
       releaseNote = "#".repeat(depth) + ` ${label}\n\n` + releaseNote;

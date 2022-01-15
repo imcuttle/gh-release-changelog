@@ -26,5 +26,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: 'v1.0.2-beta.0'
+          draft: true
           checkStandardVersion: false
           checkPkgAvailable: false
