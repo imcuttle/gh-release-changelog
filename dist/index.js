@@ -49236,7 +49236,7 @@ async function run() {
     const draft = core.getBooleanInput("draft");
     const checkPkgAvailable = core.getBooleanInput("checkPkgAvailable");
     let [repoOwner, repoName] = (core.getInput("repoUrl") || "").split("/");
-    [repoOwner, repoName] = utils.inferRepoInfo(repoOwner, repoName, {
+    [repoOwner, repoName] = await utils.inferRepoInfo(repoOwner, repoName, {
       skipEnvGithubRepoInfer: false,
     });
 
