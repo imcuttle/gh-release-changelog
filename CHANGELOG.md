@@ -1,3 +1,7 @@
+## [1.0.4](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.3...v1.0.4) (2022-01-15)
+
+
+
 ## [1.0.3](https://github.com/imcuttle/gh-release-changelog/compare/v1.0.2...v1.0.3) (2022-01-15)
 
 

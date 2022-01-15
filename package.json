@@ -1,6 +1,6 @@
 {
   "name": "gh-release-changelog",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "JavaScript Action Template",
   "main": "index.js",
   "scripts": {
