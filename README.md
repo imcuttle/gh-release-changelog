@@ -8,14 +8,22 @@ Create GitHub Release from changelog and tag push.
 
 ```yaml
 # gh-release-changelog.yml
-name: "gh-release-changelog"
+name: "Github Release"
 on:
   push:
     tags:
       - "**"
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: env
+      - run: npm ci
+      - run: npm test
   gh-release-changelog:
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - uses: actions/checkout@v2
       - uses: imcuttle/gh-release-changelog@v1
