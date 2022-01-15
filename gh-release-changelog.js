@@ -155,7 +155,7 @@ async function ghReleaseChangelog({
                       x.ref.replace(/^refs\/tags\//, "")
                     );
                     const matchedTag = tags.find((tag) => {
-                      new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
+                      return new RegExp(`^[vV]?${escapeReg(tmp.version)}$`).test(tag);
                     });
                     if (matchedTag) {
                       utils.githubActionLogger.info(
