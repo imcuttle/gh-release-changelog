@@ -49240,6 +49240,7 @@ async function run() {
       skipEnvGithubRepoInfer: false,
     });
 
+    core.info(JSON.stringify(process.env, null, 2))
     const tagParsed = utils.parserVersion(tag);
     if (!tagParsed) {
       core.warning(`tag "${tag}" is ignored.`);
