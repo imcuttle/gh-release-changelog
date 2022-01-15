@@ -279,13 +279,18 @@ async function ghReleaseChangelog({
                           }
                         )) || {}
                       ).data || [];
-                    console.log('data', data)
+                    data.reverse();
                     const tags = data.map((x) =>
                       x.ref.replace(/^refs\/tags\//, "")
                     );
                     const matchedTag = tags.find((tag) =>
                       isMatchedTag(tmp.version, tag)
                     );
+                    console.log({
+                      tags,
+                      'tmp.version': tmp.version,
+                      matchedTag
+                    })
                     if (matchedTag) {
                       fromTag = matchedTag;
                     }
