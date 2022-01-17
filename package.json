@@ -1,6 +1,6 @@
 {
   "name": "gh-release-changelog",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "bin": "./cli.js",
   "description": "Create GitHub Release from changelog and tag push",
   "main": "index.js",
