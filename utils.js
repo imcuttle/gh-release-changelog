@@ -151,12 +151,20 @@ const inferRepoInfo = (exports.inferRepoInfo = async (
           }
 
           const matches = repoUrl.match(
-            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.*)/i
+            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.+)/i
           );
           if (matches) {
-            [repoOwner, repoName] = matches[1].split("/");
+            [repoOwner, repoName] = matches[1]
+              .trim()
+              .replace(/(\.git)$/, "")
+              .split("/");
           } else {
-            [repoOwner, repoName] = repoUrl.split("/");
+            const matches = repoUrl.match(/^github:(.*)/i);
+            if (matches) {
+              [repoOwner, repoName] = matches[1].split("/");
+            } else {
+              [repoOwner, repoName] = repoUrl.split("/");
+            }
           }
         }
       }

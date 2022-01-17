@@ -1,7 +1,8 @@
 {
   "name": "gh-release-changelog",
   "version": "1.0.5",
-  "description": "JavaScript Action Template",
+  "bin": "./cli.js",
+  "description": "Create GitHub Release from changelog and tag push",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
@@ -45,6 +46,7 @@
     "load-json-file": "^6.2.0",
     "lodash.pick": "^4.4.0",
     "mdast-util-to-string": "^2.0.0",
+    "minimist": "^1.2.5",
     "p-map": "^4.0.0",
     "read-json-file": "^1.0.1",
     "read-yaml-file": "^2.1.0",

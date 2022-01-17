@@ -5,16 +5,13 @@ const fs = require("fs");
 const globby = require("globby");
 const visitTree = require("@moyuyc/visit-tree");
 const remark = require("remark");
-const { promisify } = require("util");
 const nodeToString = require("mdast-util-to-string");
-const _readJSON = require("read-json-file");
 const escapeReg = require("escape-string-regexp");
 const utils = require("./utils");
-const readJSON = promisify(_readJSON);
 
 const execSyncStdout = (cmd) => {
   try {
-    return cp.execSync(cmd).toString().trim();
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
   } catch (e) {
     return undefined;
   }
@@ -36,13 +33,14 @@ async function ghReleaseChangelog({
   fromTag,
   dryRun,
   splitNote,
-  githubToken,
+  githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
   repoOwner,
   repoName,
   ignoreTests = defaultIgnoreTests,
   draft = false,
   label,
   skipEnvGithubRepoInfer,
+  skipFromTagGitInfer,
   initialDepth = 4,
   checkPkgAvailable = false,
   checkStandardVersion = true,
@@ -144,7 +142,7 @@ async function ghReleaseChangelog({
                 } else {
                   if (!fromTag && nextNode.type === "heading") {
                     const tmp = utils.parserVersion(text);
-                    if (tmp && tmp.version) {
+                    if (tmp && tmp.version && githubToken) {
                       const octokit = github.getOctokit(githubToken);
                       const data =
                         (
@@ -235,6 +233,11 @@ async function ghReleaseChangelog({
     .trim();
 
   let url;
+  if (!skipFromTagGitInfer) {
+    fromTag =
+      fromTag ||
+      (tag && execSyncStdout(`git describe --abbrev=0 --tags ${tag}^`));
+  }
   if (fromTag) {
     url = `https://github.com/${repoOwner}/${repoName}/compare/${fromTag}...${tag}`;
   } else {

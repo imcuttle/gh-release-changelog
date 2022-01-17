@@ -1,11 +1,11 @@
 const core = require("@actions/core");
 const cp = require("child_process");
-const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = require(".");
+const { ghReleaseChangelogAnyway } = require(".");
 const utils = require("./utils");
 
 const exec = (cmd, silent = true) => {
   try {
-    return cp.execSync(cmd).toString().trim();
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
   } catch (err) {
     if (!silent) {
       core.warning(err);
@@ -87,21 +87,13 @@ async function run() {
       return;
     }
 
-    let result;
-    if (!workspaces || !workspaces.length) {
-      core.info("Run in normal repo");
-      result = await ghReleaseChangelog(options);
-    } else {
-      core.info("Run in monorepo " + workspaces.join(", "));
-      result = await ghReleaseChangelogMonorepo({
-        ...options,
-        workspaces,
-      });
-    }
+    const result = await ghReleaseChangelogAnyway({
+      ...options,
+      logger: core,
+    });
     if (dryRun) {
       core.info(`dryRun result: ` + JSON.stringify(result, null, 2));
     }
-
     core.debug(new Date().toTimeString());
   } catch (error) {
     core.setFailed(error.message);

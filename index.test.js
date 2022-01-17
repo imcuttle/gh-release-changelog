@@ -72,6 +72,7 @@ describe("ghReleaseChangelog", () => {
       repoOwner: "imcuttle",
       checkStandardVersion: false,
       checkPkgAvailable: true,
+      skipFromTagGitInfer: true
     });
 
     expect(testRequest.mock.calls).toMatchSnapshot();

@@ -4,6 +4,15 @@ const { Package } = require("@lerna/package");
 const pMap = require("p-map");
 const path = require("path");
 const pick = require("lodash.pick");
+const cp = require("child_process");
+
+const execSyncStdout = (cmd) => {
+  try {
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
+  } catch (e) {
+    return undefined;
+  }
+};
 
 const utils = require("./utils");
 const release = require("./gh-release-changelog");
@@ -12,7 +21,7 @@ module.exports = async function ghReleaseChangelogMonorepo({
   workspaces,
   dryRun,
   cwd = process.cwd(),
-  tag,
+  tag = execSyncStdout(`git describe --abbrev=0 --tags HEAD`),
   ...releaseConfig
 }) {
   if (!workspaces) {
@@ -90,6 +99,15 @@ module.exports = async function ghReleaseChangelogMonorepo({
 
   releaseNotes = releaseNotes.filter((r) => !!r.releaseNote);
   if (dryRun) {
+    if (!releaseNotes.length) {
+      utils.githubActionLogger.warning(`Fallback to using root changelog.`);
+      return release({
+        ...releaseConfig,
+        dryRun,
+        cwd,
+        tag,
+      });
+    }
     return {
       releaseNotes,
       workspaces,

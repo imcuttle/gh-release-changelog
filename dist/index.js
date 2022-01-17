@@ -1,6 +1,38 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 7701:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const ghReleaseChangelog = __nccwpck_require__(7447);
+const ghReleaseChangelogMonorepo = __nccwpck_require__(3001);
+const utils = __nccwpck_require__(1252);
+
+module.exports = async function ghReleaseChangelogAnyway({
+  logger = {
+    info: () => {},
+  },
+  ...options
+} = {}) {
+  const workspaces = await utils.getWorkspaceConfig();
+
+  let result;
+  if (!workspaces || !workspaces.length) {
+    logger && logger.info && logger.info("Run in normal repo");
+    result = await ghReleaseChangelog(options);
+  } else {
+    logger && logger.info && logger.info("Run in monorepo");
+    result = await ghReleaseChangelogMonorepo({
+      ...options,
+      workspaces,
+    });
+  }
+  return result;
+};
+
+
+/***/ }),
+
 /***/ 3001:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -10,6 +42,15 @@ const { Package } = __nccwpck_require__(8628);
 const pMap = __nccwpck_require__(1855);
 const path = __nccwpck_require__(5622);
 const pick = __nccwpck_require__(8076);
+const cp = __nccwpck_require__(3129);
+
+const execSyncStdout = (cmd) => {
+  try {
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
+  } catch (e) {
+    return undefined;
+  }
+};
 
 const utils = __nccwpck_require__(1252);
 const release = __nccwpck_require__(7447);
@@ -18,7 +59,7 @@ module.exports = async function ghReleaseChangelogMonorepo({
   workspaces,
   dryRun,
   cwd = process.cwd(),
-  tag,
+  tag = execSyncStdout(`git describe --abbrev=0 --tags HEAD`),
   ...releaseConfig
 }) {
   if (!workspaces) {
@@ -96,6 +137,15 @@ module.exports = async function ghReleaseChangelogMonorepo({
 
   releaseNotes = releaseNotes.filter((r) => !!r.releaseNote);
   if (dryRun) {
+    if (!releaseNotes.length) {
+      utils.githubActionLogger.warning(`Fallback to using root changelog.`);
+      return release({
+        ...releaseConfig,
+        dryRun,
+        cwd,
+        tag,
+      });
+    }
     return {
       releaseNotes,
       workspaces,
@@ -144,16 +194,13 @@ const fs = __nccwpck_require__(5747);
 const globby = __nccwpck_require__(3398);
 const visitTree = __nccwpck_require__(9975);
 const remark = __nccwpck_require__(2081);
-const { promisify } = __nccwpck_require__(1669);
 const nodeToString = __nccwpck_require__(5789);
-const _readJSON = __nccwpck_require__(4085);
 const escapeReg = __nccwpck_require__(8691);
 const utils = __nccwpck_require__(1252);
-const readJSON = promisify(_readJSON);
 
 const execSyncStdout = (cmd) => {
   try {
-    return cp.execSync(cmd).toString().trim();
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
   } catch (e) {
     return undefined;
   }
@@ -175,13 +222,14 @@ async function ghReleaseChangelog({
   fromTag,
   dryRun,
   splitNote,
-  githubToken,
+  githubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_AUTH,
   repoOwner,
   repoName,
   ignoreTests = defaultIgnoreTests,
   draft = false,
   label,
   skipEnvGithubRepoInfer,
+  skipFromTagGitInfer,
   initialDepth = 4,
   checkPkgAvailable = false,
   checkStandardVersion = true,
@@ -283,7 +331,7 @@ async function ghReleaseChangelog({
                 } else {
                   if (!fromTag && nextNode.type === "heading") {
                     const tmp = utils.parserVersion(text);
-                    if (tmp && tmp.version) {
+                    if (tmp && tmp.version && githubToken) {
                       const octokit = github.getOctokit(githubToken);
                       const data =
                         (
@@ -374,6 +422,11 @@ async function ghReleaseChangelog({
     .trim();
 
   let url;
+  if (!skipFromTagGitInfer) {
+    fromTag =
+      fromTag ||
+      (tag && execSyncStdout(`git describe --abbrev=0 --tags ${tag}^`));
+  }
   if (fromTag) {
     url = `https://github.com/${repoOwner}/${repoName}/compare/${fromTag}...${tag}`;
   } else {
@@ -430,10 +483,12 @@ module.exports = ghReleaseChangelog;
 
 const ghReleaseChangelog = __nccwpck_require__(7447);
 const ghReleaseChangelogMonorepo = __nccwpck_require__(3001);
+const ghReleaseChangelogAnyway = __nccwpck_require__(7701);
 
 module.exports = {
   ghReleaseChangelog,
   ghReleaseChangelogMonorepo,
+  ghReleaseChangelogAnyway,
 };
 
 
@@ -49027,12 +49082,20 @@ const inferRepoInfo = (exports.inferRepoInfo = async (
           }
 
           const matches = repoUrl.match(
-            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.*)/i
+            /(?:https?|git(?:\+ssh)?)(?::\/\/)(?:www\.)?github\.com\/(.+)/i
           );
           if (matches) {
-            [repoOwner, repoName] = matches[1].split("/");
+            [repoOwner, repoName] = matches[1]
+              .trim()
+              .replace(/(\.git)$/, "")
+              .split("/");
           } else {
-            [repoOwner, repoName] = repoUrl.split("/");
+            const matches = repoUrl.match(/^github:(.*)/i);
+            if (matches) {
+              [repoOwner, repoName] = matches[1].split("/");
+            } else {
+              [repoOwner, repoName] = repoUrl.split("/");
+            }
           }
         }
       }
@@ -49345,12 +49408,12 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(2186);
 const cp = __nccwpck_require__(3129);
-const { ghReleaseChangelog, ghReleaseChangelogMonorepo } = __nccwpck_require__(2932);
+const { ghReleaseChangelogAnyway } = __nccwpck_require__(2932);
 const utils = __nccwpck_require__(1252);
 
 const exec = (cmd, silent = true) => {
   try {
-    return cp.execSync(cmd).toString().trim();
+    return cp.execSync(cmd, { stdio: "pipe" }).toString().trim();
   } catch (err) {
     if (!silent) {
       core.warning(err);
@@ -49432,21 +49495,13 @@ async function run() {
       return;
     }
 
-    let result;
-    if (!workspaces || !workspaces.length) {
-      core.info("Run in normal repo");
-      result = await ghReleaseChangelog(options);
-    } else {
-      core.info("Run in monorepo " + workspaces.join(", "));
-      result = await ghReleaseChangelogMonorepo({
-        ...options,
-        workspaces,
-      });
-    }
+    const result = await ghReleaseChangelogAnyway({
+      ...options,
+      logger: core,
+    });
     if (dryRun) {
       core.info(`dryRun result: ` + JSON.stringify(result, null, 2));
     }
-
     core.debug(new Date().toTimeString());
   } catch (error) {
     core.setFailed(error.message);
