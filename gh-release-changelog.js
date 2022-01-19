@@ -172,7 +172,7 @@ async function ghReleaseChangelog({
                       });
                       if (matchedTag) {
                         utils.githubActionLogger.info(
-                          `Inferred fromTag "${matchedTag}" from ${tmp.version}}`
+                          `Inferred fromTag "${matchedTag}" from ${tmp.version}`
                         );
                         fromTag = matchedTag;
                       } else {
@@ -285,3 +285,4 @@ async function ghReleaseChangelog({
 }
 
 module.exports = ghReleaseChangelog;
+module.exports.defaultIgnoreTests = defaultIgnoreTests;
