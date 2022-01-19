@@ -1,35 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ghReleaseChangelog depth-smaller 1`] = `
-Array [
-  Array [
-    Object {
-      "owner": "a",
-      "ref": "tags",
-      "repo": "b",
-    },
-  ],
-  Array [
-    Object {
-      "accept": undefined,
-      "body": "### Performance Improvements
-
-*   只读模式下，也支持物料拖拽编辑 & 优化小组件拖拽展示 ([ae1939c](https://github.com/imcuttle/mometa/commit/ae1939cffa8115cb60e615029ad5b90eca4784e0))
-
-**Full Changelog**: https://github.com/a/b/commits/0.0.23",
-      "discussion_category_name": undefined,
-      "draft": false,
-      "generate_release_notes": undefined,
-      "owner": "a",
-      "prerelease": undefined,
-      "repo": "b",
-      "tag_name": "0.0.23",
-      "target_commitish": undefined,
-    },
-  ],
-]
-`;
-
 exports[`ghReleaseChangelog valid 1`] = `
 Array [
   Array [
